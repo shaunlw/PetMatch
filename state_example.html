@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html ng-app = "myApp">
+
+<head>
+  <meta charset="utf-8">
+  <title>CandyCrush2</title>
+  <meta name="description" content="CandyCrush2 game">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="css/CandyCrush2.css">
+  <script src="lib/angular.js"></script>
+  <script src="lib/turnBasedServices.3.js"></script>
+  <script>
+    angular.module('myApp', ['gameServices']).run(function () { resizeGameAreaService.setWidthToHeight(1); });
+  </script>
+</head>
+
+<div id="gameArea" style="position:absolute; top:0%; left:0%; width:100%; height:100%;">
+  <!-- first row -->
+  <div style="position:absolute; top:0%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="source.gif" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+
+  <!-- second row -->
+  <div style="position:absolute; top:11%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+  
+   <!-- third row -->
+  <div style="position:absolute; top:22%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+
+  <!-- fourth row -->
+  <div style="position:absolute; top:33%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+
+  <!-- fifth row -->
+  <div style="position:absolute; top:44%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+  
+  <!-- sixth row -->
+  <div style="position:absolute; top:55%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+  <!-- seventh row -->
+  <div style="position:absolute; top:66%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+  
+  <!-- eighth row -->
+  <div style="position:absolute; top:77%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+
+    <!-- ninth row -->
+  <div style="position:absolute; top:88%; left:0%; width:100%; height:11%;">
+  	<div style="position:absolute; top:0%; left:0%; width:11%; height:100%;" 
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">		
+  		</div>
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:11%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  	
+  	<div style="position:absolute; top:0%; left:22%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div> 
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:33%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:44%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:55%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="bird.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+  	<div style="position:absolute; top:0%; left:66%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="pica.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+	
+  	<div style="position:absolute; top:0%; left:77%; width:11%; height:100%;"
+  			class="r b">
+  		<div style="width:100%; height:100%;">
+			<img src="horse.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+
+
+  	<div style="position:absolute; top:0%; left:88%; width:11%; height:100%;"
+  			class="b">
+  		<div style="width:100%; height:100%;">
+			<img src="penguin.png" width="100%" height="100%">	
+  		</div>  	
+  	</div>
+  </div>
+<html>
+
