@@ -409,7 +409,7 @@ function shuffle(curState : IState) : IState {
  * @ return board after update
  **/
 export function updateBoard(board : Board, match : lineDelta[]) : BoardCount {
-  window.alert(match.length);
+  //window.alert(match.length);
   let count : number = 0;
   //mark elements to be removed
   let visited : boolean[][] = [];
@@ -426,13 +426,13 @@ export function updateBoard(board : Board, match : lineDelta[]) : BoardCount {
     }
     if (line.startDelta.row === line.endDelta.row) {
       let row : number = line.startDelta.row;
-      window.alert("row " + row);
-      window.alert("start col " + line.startDelta.col + " end col " + line.endDelta.col);
+      //window.alert("row " + row);
+      //window.alert("start col " + line.startDelta.col + " end col " + line.endDelta.col);
       for (let col : number = line.startDelta.col; col <= line.endDelta.col; col++)  {
-         window.alert("cell1 " + " row " + row + " col " + col)
+         //window.alert("cell1 " + " row " + row + " col " + col)
         if (!visited[row][col]) {
           visited[row][col] = true;
-          window.alert("cell " + " row " + row + " col " + col);
+          //window.alert("cell " + " row " + row + " col " + col);
           count++;
         }
       }

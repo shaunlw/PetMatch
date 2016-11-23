@@ -135,6 +135,13 @@ var gameLogic;
         let ROWL : number = Math.min(fromDelta.row, toDelta.row);
         let ROWR : number = Math.max(fromDelta.col, toDelta.col); */
         var i = 0;
+        //swap on temp board
+        var petFrom = board[fromDelta.row][fromDelta.col];
+        board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
+        board[toDelta.row][toDelta.col] = petFrom;
+        //check alignment for pet currently in fromIndex
+        var target = board[fromDelta.row][fromDelta.col];
+        var count = 1;
         var startDelta = {
             row: 0,
             col: 0
@@ -143,13 +150,6 @@ var gameLogic;
             row: 0,
             col: 0
         };
-        //swap on temp board
-        var petFrom = board[fromDelta.row][fromDelta.col];
-        board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
-        board[toDelta.row][toDelta.col] = petFrom;
-        //check alignment for pet currently in fromIndex
-        var target = board[fromDelta.row][fromDelta.col];
-        var count = 1;
         startDelta.row = fromDelta.row;
         endDelta.row = fromDelta.row;
         var col = fromDelta.col;
@@ -162,7 +162,7 @@ var gameLogic;
             }
         }
         endDelta.col = col - 1;
-        window.alert("end col " + endDelta.col);
+        // window.alert("end col " + endDelta.col);
         for (col = fromDelta.col - 1; col >= 0; col--) {
             if (board[fromDelta.row][col] === target) {
                 count++;
@@ -172,8 +172,8 @@ var gameLogic;
             }
         }
         startDelta.col = col + 1;
-        window.alert("start col " + startDelta.col);
-        window.alert("count " + count);
+        //window.alert("start col " + startDelta.col);
+        //window.alert("count " + count);
         if (count >= 3) {
             var lDelta = {
                 startDelta: startDelta,
@@ -181,6 +181,8 @@ var gameLogic;
             };
             match[i++] = lDelta;
         }
+        startDelta = angular.copy(startDelta);
+        endDelta = angular.copy(endDelta);
         startDelta.col = fromDelta.col;
         endDelta.col = fromDelta.col;
         count = 1;
@@ -214,6 +216,8 @@ var gameLogic;
         target = board[toDelta.row][toDelta.col];
         count = 1;
         col = toDelta.col;
+        startDelta = angular.copy(startDelta);
+        endDelta = angular.copy(endDelta);
         startDelta.row = toDelta.row;
         endDelta.row = toDelta.row;
         for (col = toDelta.col + 1; col < gameLogic.PARAMS.COLS; col++) {
@@ -242,6 +246,8 @@ var gameLogic;
             match[i++] = lDelta;
         }
         count = 1;
+        startDelta = angular.copy(startDelta);
+        endDelta = angular.copy(endDelta);
         startDelta.col = toDelta.col;
         endDelta.col = toDelta.col;
         for (row = toDelta.row + 1; row < gameLogic.PARAMS.ROWS; row++) {
@@ -364,7 +370,7 @@ var gameLogic;
      * @ return board after update
      **/
     function updateBoard(board, match) {
-        window.alert(match.length);
+        //window.alert(match.length);
         var count = 0;
         //mark elements to be removed
         var visited = [];
@@ -381,9 +387,13 @@ var gameLogic;
             }
             if (line.startDelta.row === line.endDelta.row) {
                 var row = line.startDelta.row;
+                //window.alert("row " + row);
+                //window.alert("start col " + line.startDelta.col + " end col " + line.endDelta.col);
                 for (var col = line.startDelta.col; col <= line.endDelta.col; col++) {
+                    //window.alert("cell1 " + " row " + row + " col " + col)
                     if (!visited[row][col]) {
                         visited[row][col] = true;
+                        //window.alert("cell " + " row " + row + " col " + col);
                         count++;
                     }
                 }
@@ -474,7 +484,7 @@ var gameLogic;
         if (!match) {
             throw new Error("Can only make a move for pet matches of 3  or over 3!");
         }
-        window.alert(match.length);
+        //window.alert(match.length);
         //get state after movement 
         var stateAfterMove = checkBoard(stateBeforeMove, turnIndexBeforeMove, match);
         var winner = getWinner(stateAfterMove);
