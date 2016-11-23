@@ -163,14 +163,7 @@ module gameLogic {
     let ROWL : number = Math.min(fromDelta.row, toDelta.row);
     let ROWR : number = Math.max(fromDelta.col, toDelta.col); */
     let i : number = 0;
-    let startDelta : BoardDelta = {
-      row : 0,
-      col : 0
-    };
-    let endDelta : BoardDelta = {
-      row : 0,
-      col : 0
-    };
+   
     //swap on temp board
     let petFrom : string = board[fromDelta.row][fromDelta.col];
     board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
@@ -178,6 +171,14 @@ module gameLogic {
     //check alignment for pet currently in fromIndex
     let target : string = board[fromDelta.row][fromDelta.col];
     let count : number = 1;
+     let startDelta : BoardDelta = {
+      row : 0,
+      col : 0
+    };
+    let endDelta : BoardDelta = {
+      row : 0,
+      col : 0
+    }; 
     startDelta.row = fromDelta.row;
     endDelta.row = fromDelta.row;
     let col : number = fromDelta.col;
@@ -189,7 +190,7 @@ module gameLogic {
       }
     }
     endDelta.col = col - 1;
-    window.alert("end col " + endDelta.col);
+   // window.alert("end col " + endDelta.col);
     for (col = fromDelta.col - 1; col >= 0; col--) {
       if (board[fromDelta.row][col] === target) {
         count++;
@@ -198,17 +199,21 @@ module gameLogic {
       }
     }
     startDelta.col = col + 1;
-    window.alert("start col " + startDelta.col);
-    window.alert("count " + count);
+    //window.alert("start col " + startDelta.col);
+    //window.alert("count " + count);
     if (count >= 3) {
       let lDelta :lineDelta = {
         startDelta : startDelta,
         endDelta : endDelta
       }
       match[i++] = lDelta;
+      //window.alert(" row " + startDelta.row);
       //window.alert("start col " + startDelta.col);
+      //window.alert("end col " + endDelta.col);
     }
-
+    
+    startDelta = angular.copy(startDelta);
+    endDelta = angular.copy(endDelta);
     startDelta.col = fromDelta.col;
     endDelta.col = fromDelta.col;
     count = 1;
@@ -235,13 +240,17 @@ module gameLogic {
         endDelta : endDelta
       }
       match[i++] = lDelta;
+      //window.alert("col  " + startDelta.col);
       //window.alert("start row " + startDelta.row);
+      //window.alert("end row " + endDelta.row);
     }
 
     //check check alignment for pet currently in toIndex
     target = board[toDelta.row][toDelta.col];
     count = 1;
     col = toDelta.col;
+    startDelta = angular.copy(startDelta);
+    endDelta = angular.copy(endDelta);
     startDelta.row = toDelta.row;
     endDelta.row = toDelta.row;
     for (col = toDelta.col + 1; col < PARAMS.COLS; col++) {
@@ -266,10 +275,14 @@ module gameLogic {
         endDelta : endDelta
       }
       match[i++] = lDelta;
+      //window.alert("row " + startDelta.row);
       //window.alert("start col " + startDelta.col);
+      //window.alert("end col " + endDelta.col);
     }
 
     count = 1;
+    startDelta = angular.copy(startDelta);
+    endDelta = angular.copy(endDelta);
     startDelta.col = toDelta.col;
     endDelta.col = toDelta.col;
     for (row = toDelta.row + 1; row < PARAMS.ROWS; row++) {
@@ -295,7 +308,9 @@ module gameLogic {
         endDelta : endDelta
       }
       match[i++] = lDelta;
+      //window.alert("col  " + startDelta.col);
       //window.alert("start row " + startDelta.row);
+      //window.alert("end row " + endDelta.row);
     }
     return match;
   }
@@ -411,9 +426,13 @@ export function updateBoard(board : Board, match : lineDelta[]) : BoardCount {
     }
     if (line.startDelta.row === line.endDelta.row) {
       let row : number = line.startDelta.row;
+      window.alert("row " + row);
+      window.alert("start col " + line.startDelta.col + " end col " + line.endDelta.col);
       for (let col : number = line.startDelta.col; col <= line.endDelta.col; col++)  {
+         window.alert("cell1 " + " row " + row + " col " + col)
         if (!visited[row][col]) {
           visited[row][col] = true;
+          window.alert("cell " + " row " + row + " col " + col);
           count++;
         }
       }
@@ -503,7 +522,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
     if (!match) {
       throw new Error("Can only make a move for pet matches of 3  or over 3!");
     }
-    window.alert(match.length);
+    //window.alert(match.length);
 
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, match);
