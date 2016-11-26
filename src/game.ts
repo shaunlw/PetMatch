@@ -14,6 +14,11 @@ interface CellSize {
     height : number;
 }
 
+interface TopLeft {
+  top: number;
+  left: number;
+}
+
 
 
 module game {
@@ -26,6 +31,10 @@ module game {
     export let board: Board = null;
     export let dragAndDropStartPos: BoardDelta = null;
     export let dragAndDropElement: HTMLElement = null;
+    
+    function getTranslations(): Translations {
+        return {};
+    }
 
     export function init() {
         registerServiceWorker();
@@ -43,12 +52,120 @@ module game {
         updateUI: updateUI,
         gotMessageFromPlatform: null,
         });
-        dragAndDropService.addDragListener("gameArea", handleDragEvent);
+        dragAndDropService.addDragListener("gameArea", handleDragEvent);//'gameArea' here refers to the reference variable not the string literal representing the element id.
+    }//addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
+
+    export function handleDragEvent(type : string, cx : number, cy : number) {//the 'event' parameter is not here but in the declaration - why? 
+        log.log("type", type);
+        log.log("cx " + cx);
+        log.log("cy : " + cy);
+        
+        //if the user drags cell to outside of the game area, the function will take middle point of the nearest cell        
+        let cellSize: CellSize = getCellSize();//cell size changes when you switch device or resize window             
+        let x : number = Math.min(Math.max(cx - gameArea.offsetLeft, cellSize.width / 2), gameArea.clientWidth - cellSize.width / 2);//convert absolute position to relative position (relative to parent element)
+        let y : number = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2);//the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
+        log.log("x position : " + x);
+        log.log("y position : " + y);
+        let dragAndDropPos = {//what is this?
+            top : y - cellSize.height * 0.605,//why 0.605?
+            left : x - cellSize.width * 0.605
+        };
+        let dragAndDropStart : any;
+
+        //dragging around
+        if (type == "touchmove") {
+            if (dragAndDropPos) setDragAndDropElementPos(dragAndDropPos, cellSize);
+            return;
+        }
+        //get the index of cell based on current pos (cx, cy). identify cell based on mouse position
+        let delta : BoardDelta = {
+            row : Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
+            col : Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
+        };
+        log.log(delta);
+        if (type == "touchstart"){//if mouse pressed down
+            dragAndDropStartPos = delta;//save start cell, because a new delta will be calculated once pressed mouse is moved.
+            dragAndDropStart = dragAndDropPos;
+            dragAndDropElement = document.getElementById("img_container_" + dragAndDropStartPos.row + "_" + dragAndDropStartPos.col);
+            let style: any = dragAndDropElement.style;
+            style['z-index'] = 20;
+            setDragAndDropElementPos(dragAndDropPos, cellSize);
+            return;
+        }
+        
+        if (type == "touchend" && dragAndDropStartPos) {//if mouse released from a drag
+            let fromDelta = {
+                row : dragAndDropStartPos.row,
+                col : dragAndDropStartPos.col
+            };
+            let toDelta = {
+                row : delta.row,//new delta is calculated based on new cursor position
+                col : delta.col
+            };
+            let nextMove : IMove = null;
+            if (dragOk(fromDelta, toDelta)) {//if human turn
+                state.fromDelta = fromDelta;
+                state.toDelta = toDelta;
+                try {//calculate next move, if ilegal then report error.
+                    nextMove = gameLogic.createMove(state, currentUpdateUI.move.turnIndexAfterMove);
+                } catch (e) {
+                    log.info(["Move is illegal:", e]);
+                    endDragAndDrop();//move back to original position
+                    return;
+                }
+                makeMove(nextMove);//make legal move
+            }
+
+        }
+        if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
+            endDragAndDrop();
+        }
+    }//end handleDragEvent()
+
+    function getCellSize() : CellSize {//calculate cell size, which varies on different devices.
+        return {
+            width : gameArea.clientWidth / PARAMS.COLS,//gameArea.clientWidth is the width of the html body.
+            height : gameArea.clientHeight / PARAMS.ROWS
+        };
     }
     
-    function getTranslations(): Translations {
-        return {};
+    /**
+   * Set the TopLeft of the element.
+   */
+  function setDragAndDropElementPos(pos: TopLeft, cellSize: CellSize): void {
+    let style: any = dragAndDropElement.style;
+    let top: number = cellSize.height / 10;
+    let left: number = cellSize.width / 10;
+    let originalSize = getCellPos(dragAndDropStartPos.row, dragAndDropStartPos.col, cellSize);
+    let deltaX: number = (pos.left - originalSize.left + left);
+    let deltaY: number = (pos.top - originalSize.top + top);
+    // make it 20% bigger (as if it's closer to the person dragging).
+    let transform = "translate(" + deltaX + "px," + deltaY + "px) scale(1.2)";
+    style['transform'] = transform;
+    style['-webkit-transform'] = transform;
+    style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
+  }
+
+    /**
+   * Get the position of the cell.
+   */
+  function getCellPos(row: number, col: number, cellSize: CellSize): TopLeft {
+    let top: number = row * cellSize.height;
+    let left: number = col * cellSize.width;
+    let pos: TopLeft = {top: top, left: left};
+    return pos;
+  }
+
+  function animationEndedCallback() {
+    log.info("Animation ended");
+    maybeSendComputerMove();
+  }
+  function clearAnimationTimeout() {
+    if (animationEndedTimeout) {
+      $timeout.cancel(animationEndedTimeout);
+      animationEndedTimeout = null;
     }
+  }  
 
     export function updateUI(params: IUpdateUI): void {
     log.info("Game got updateUI :", params);
@@ -68,24 +185,12 @@ module game {
     }
   }
 
-  function animationEndedCallback() {
-    log.info("Animation ended");
-    maybeSendComputerMove();
-  }
-
    function maybeSendComputerMove() {
        if (!isComputerTurn()) return;
        //let move = aiService.findComputerMove(currentUpdateUI.move);
        //log.info("Computer move: ", move);
       // makeMove(move);
     }
-
-  function clearAnimationTimeout() {
-    if (animationEndedTimeout) {
-      $timeout.cancel(animationEndedTimeout);
-      animationEndedTimeout = null;
-    }
-  }
 
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
@@ -97,73 +202,6 @@ module game {
                 log.log('ServiceWorker registration failed: ', err);
             });
         }
-    }
-
-    export function handleDragEvent(type : string, cx : number, cy : number) {
-        log.log("type", type);
-        log.log("cx " + cx);
-        log.log("cy : " + cy);
-        let cellSize: CellSize = getCellSize();
-        //set x and y as if the offsetLeft/ offsetTop are start point(zero)
-        //if the user drags cell to outside of the game area, the function will take middle point of the nearest cell 
-        let x : number = Math.min(Math.max(cx - gameArea.offsetLeft, cellSize.width / 2), gameArea.clientWidth - cellSize.width / 2);
-        let y : number = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2);
-        log.log("x position : " + x);
-        log.log("y position : " + y);
-        let dragAndDropPos = {
-            top : y - cellSize.height * 0.605,
-            left : x - cellSize.width * 0.605
-        };
-
-        //left for animation purpose
-        if (type == "touchmove") {
-            //if (dragAndDropStartPos) setDragAndDropPos(dragAndDropPos, cellSize);
-            return;
-        }
-        
-        //get the index of cell based on current pos (cx, cy)
-        let delta : BoardDelta = {
-            row : Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
-            col : Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
-        };
-
-        log.log(delta);
-        if (type == "touchstart"){
-            dragAndDropStartPos = delta;
-        }
-
-        if (type == "touchend" && dragAndDropStartPos) {
-            let fromDelta = {
-                row : dragAndDropStartPos.row,
-                col : dragAndDropStartPos.col
-            };
-            let toDelta = {
-                row : delta.row,
-                col : delta.col
-            };
-            
-            let nextMove : IMove = null;
-            if (dragOk(fromDelta, toDelta)) {
-                state.fromDelta = fromDelta;
-                state.toDelta = toDelta;
-                try {
-                    nextMove = gameLogic.createMove(state, currentUpdateUI.move.turnIndexAfterMove);
-                } catch (e) {
-                    log.info(["Move is illegal:", e]);
-                    return;
-                }
-                makeMove(nextMove);
-                //setDragAndDropPos(dragAndDropPos, cellSize);
-                //updateCacheAndApply();
-            }
-            return;
-        }
-
-        if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
-            endDragAndDrop();
-            //updateCacheAndApply(); 
-        }
-        
     }
 
     /**
@@ -184,13 +222,8 @@ module game {
 
     function endDragAndDrop() : void {
         dragAndDropStartPos = null;
-    }
-
-    function getCellSize() : CellSize {
-        return {
-            width : gameArea.clientWidth / PARAMS.COLS,
-            height : gameArea.clientHeight / PARAMS.ROWS
-        };
+        if (dragAndDropElement) dragAndDropElement.removeAttribute("style");
+        dragAndDropElement = null;
     }
     
     function makeMove(move: IMove) {
@@ -246,6 +279,6 @@ module game {
 
 angular.module('myApp', ['gameServices'])
   .run(function () {
-    $rootScope['game'] = game;
-    game.init();
+    $rootScope['game'] = game;//create a subscope in rootscope and name it 'game', asign it with the herein defined 'game'module
+    game.init();//does this get run before rendering the view? i.e. can dom display values created by this ini()?
   });

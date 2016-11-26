@@ -9,7 +9,7 @@
 
         <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
         <!-- build:[href] css/everything.min.css -->
-        <link rel="stylesheet" type="text/css" href="css/game.css">
+        <link rel="stylesheet" type="text/css" href="css/PetMatch.css">
         <!-- /build -->
         
         <!-- build:js js/everything.min.js -->
@@ -31,7 +31,7 @@
                 id="{{'e2e_test_div_' + row + 'x' + col}}">
                 <div id="{{'img_container_' + row + '_' + col}}"
                     class="img_container"
-                    style="position:absolute; top:0; left:0; width:100%; height:100%;">
+                    >
                     
                     <img ng-if = "game.isPieceA(row, col)" src = "images/bird.png"
                         id="{{'e2e_test_pieceA_' + row + 'x' + col}}"

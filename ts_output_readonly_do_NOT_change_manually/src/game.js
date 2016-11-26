@@ -10,6 +10,9 @@ var game;
     game.board = null;
     game.dragAndDropStartPos = null;
     game.dragAndDropElement = null;
+    function getTranslations() {
+        return {};
+    }
     function init() {
         registerServiceWorker();
         gameArea = document.getElementById("gameArea");
@@ -25,11 +28,115 @@ var game;
             updateUI: updateUI,
             gotMessageFromPlatform: null,
         });
-        dragAndDropService.addDragListener("gameArea", handleDragEvent);
+        dragAndDropService.addDragListener("gameArea", handleDragEvent); //'gameArea' here refers to the reference variable not the string literal representing the element id.
     }
-    game.init = init;
-    function getTranslations() {
-        return {};
+    game.init = init; //addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
+    function handleDragEvent(type, cx, cy) {
+        log.log("type", type);
+        log.log("cx " + cx);
+        log.log("cy : " + cy);
+        //if the user drags cell to outside of the game area, the function will take middle point of the nearest cell        
+        var cellSize = getCellSize(); //cell size changes when you switch device or resize window             
+        var x = Math.min(Math.max(cx - gameArea.offsetLeft, cellSize.width / 2), gameArea.clientWidth - cellSize.width / 2); //convert absolute position to relative position (relative to parent element)
+        var y = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2); //the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
+        log.log("x position : " + x);
+        log.log("y position : " + y);
+        var dragAndDropPos = {
+            top: y - cellSize.height * 0.605,
+            left: x - cellSize.width * 0.605
+        };
+        var dragAndDropStart;
+        //dragging around
+        if (type == "touchmove") {
+            if (dragAndDropPos)
+                setDragAndDropElementPos(dragAndDropPos, cellSize);
+            return;
+        }
+        //get the index of cell based on current pos (cx, cy). identify cell based on mouse position
+        var delta = {
+            row: Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
+            col: Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
+        };
+        log.log(delta);
+        if (type == "touchstart") {
+            game.dragAndDropStartPos = delta; //save start cell, because a new delta will be calculated once pressed mouse is moved.
+            dragAndDropStart = dragAndDropPos;
+            game.dragAndDropElement = document.getElementById("img_container_" + game.dragAndDropStartPos.row + "_" + game.dragAndDropStartPos.col);
+            var style = game.dragAndDropElement.style;
+            style['z-index'] = 20;
+            setDragAndDropElementPos(dragAndDropPos, cellSize);
+            return;
+        }
+        if (type == "touchend" && game.dragAndDropStartPos) {
+            var fromDelta = {
+                row: game.dragAndDropStartPos.row,
+                col: game.dragAndDropStartPos.col
+            };
+            var toDelta = {
+                row: delta.row,
+                col: delta.col
+            };
+            var nextMove = null;
+            if (dragOk(fromDelta, toDelta)) {
+                game.state.fromDelta = fromDelta;
+                game.state.toDelta = toDelta;
+                try {
+                    nextMove = gameLogic.createMove(game.state, game.currentUpdateUI.move.turnIndexAfterMove);
+                }
+                catch (e) {
+                    log.info(["Move is illegal:", e]);
+                    // setDragAndDropElementPos(dragAndDropStart, cellSize);
+                    endDragAndDrop();
+                    return;
+                }
+                makeMove(nextMove); //make legal move
+            }
+        }
+        if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
+            endDragAndDrop();
+        }
+    }
+    game.handleDragEvent = handleDragEvent; //end handleDragEvent()
+    function getCellSize() {
+        return {
+            width: gameArea.clientWidth / PARAMS.COLS,
+            height: gameArea.clientHeight / PARAMS.ROWS
+        };
+    }
+    /**
+   * Set the TopLeft of the element.
+   */
+    function setDragAndDropElementPos(pos, cellSize) {
+        var style = game.dragAndDropElement.style;
+        var top = cellSize.height / 10;
+        var left = cellSize.width / 10;
+        var originalSize = getCellPos(game.dragAndDropStartPos.row, game.dragAndDropStartPos.col, cellSize);
+        var deltaX = (pos.left - originalSize.left + left);
+        var deltaY = (pos.top - originalSize.top + top);
+        // make it 20% bigger (as if it's closer to the person dragging).
+        var transform = "translate(" + deltaX + "px," + deltaY + "px) scale(1.2)";
+        style['transform'] = transform;
+        style['-webkit-transform'] = transform;
+        style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
+    }
+    /**
+   * Get the position of the cell.
+   */
+    function getCellPos(row, col, cellSize) {
+        var top = row * cellSize.height;
+        var left = col * cellSize.width;
+        var pos = { top: top, left: left };
+        return pos;
+    }
+    function animationEndedCallback() {
+        log.info("Animation ended");
+        maybeSendComputerMove();
+    }
+    function clearAnimationTimeout() {
+        if (game.animationEndedTimeout) {
+            $timeout.cancel(game.animationEndedTimeout);
+            game.animationEndedTimeout = null;
+        }
     }
     function updateUI(params) {
         log.info("Game got updateUI :", params);
@@ -51,22 +158,12 @@ var game;
         }
     }
     game.updateUI = updateUI;
-    function animationEndedCallback() {
-        log.info("Animation ended");
-        maybeSendComputerMove();
-    }
     function maybeSendComputerMove() {
         if (!isComputerTurn())
             return;
         //let move = aiService.findComputerMove(currentUpdateUI.move);
         //log.info("Computer move: ", move);
         // makeMove(move);
-    }
-    function clearAnimationTimeout() {
-        if (game.animationEndedTimeout) {
-            $timeout.cancel(game.animationEndedTimeout);
-            game.animationEndedTimeout = null;
-        }
     }
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
@@ -79,64 +176,6 @@ var game;
             });
         }
     }
-    function handleDragEvent(type, cx, cy) {
-        log.log("type", type);
-        log.log("cx " + cx);
-        log.log("cy : " + cy);
-        var cellSize = getCellSize();
-        //set x and y as if the offsetLeft/ offsetTop are start point(zero)
-        //if the user drags cell to outside of the game area, the function will take middle point of the nearest cell 
-        var x = Math.min(Math.max(cx - gameArea.offsetLeft, cellSize.width / 2), gameArea.clientWidth - cellSize.width / 2);
-        var y = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2);
-        log.log("x position : " + x);
-        log.log("y position : " + y);
-        var dragAndDropPos = {
-            top: y - cellSize.height * 0.605,
-            left: x - cellSize.width * 0.605
-        };
-        //left for animation purpose
-        if (type == "touchmove") {
-            //if (dragAndDropStartPos) setDragAndDropPos(dragAndDropPos, cellSize);
-            return;
-        }
-        //get the index of cell based on current pos (cx, cy)
-        var delta = {
-            row: Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
-            col: Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
-        };
-        log.log(delta);
-        if (type == "touchstart") {
-            game.dragAndDropStartPos = delta;
-        }
-        if (type == "touchend" && game.dragAndDropStartPos) {
-            var fromDelta = {
-                row: game.dragAndDropStartPos.row,
-                col: game.dragAndDropStartPos.col
-            };
-            var toDelta = {
-                row: delta.row,
-                col: delta.col
-            };
-            var nextMove = null;
-            if (dragOk(fromDelta, toDelta)) {
-                game.state.fromDelta = fromDelta;
-                game.state.toDelta = toDelta;
-                try {
-                    nextMove = gameLogic.createMove(game.state, game.currentUpdateUI.move.turnIndexAfterMove);
-                }
-                catch (e) {
-                    log.info(["Move is illegal:", e]);
-                    return;
-                }
-                makeMove(nextMove);
-            }
-            return;
-        }
-        if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
-            endDragAndDrop();
-        }
-    }
-    game.handleDragEvent = handleDragEvent;
     /**
      * @ params fromDelta position of from cell
      * @ params toDelta position of to cell
@@ -153,12 +192,9 @@ var game;
     }
     function endDragAndDrop() {
         game.dragAndDropStartPos = null;
-    }
-    function getCellSize() {
-        return {
-            width: gameArea.clientWidth / PARAMS.COLS,
-            height: gameArea.clientHeight / PARAMS.ROWS
-        };
+        if (game.dragAndDropElement)
+            game.dragAndDropElement.removeAttribute("style");
+        game.dragAndDropElement = null;
     }
     function makeMove(move) {
         if (game.didMakeMove) {
@@ -206,7 +242,7 @@ var game;
 })(game || (game = {}));
 angular.module('myApp', ['gameServices'])
     .run(function () {
-    $rootScope['game'] = game;
-    game.init();
+    $rootScope['game'] = game; //create a subscope in rootscope and name it 'game', asign it with the herein defined 'game'module
+    game.init(); //does this get run before rendering the view? i.e. can dom display values created by this ini()?
 });
 //# sourceMappingURL=game.js.map
