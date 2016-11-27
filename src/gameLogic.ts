@@ -21,6 +21,7 @@ interface IState {
   //score for players of corresponding index 
   scores : number[];
   completedSteps : number;
+  boardCount : BoardCount;
 }
 
 module gameLogic {
@@ -96,6 +97,7 @@ module gameLogic {
       toDelta : null,
       scores : scores,
       completedSteps : 0,
+      boardCount : null
     };
   }
 
@@ -154,7 +156,7 @@ module gameLogic {
   /**
    * @ Return info of all matched pets with pet in fromDelta or toDelta.
    **/
-  function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
+   function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
     
     let match : lineDelta[] = [];
     /*
@@ -408,7 +410,12 @@ function shuffle(curState : IState) : IState {
  * @ board board before update
  * @ return board after update
  **/
-export function updateBoard(board : Board, match : lineDelta[]) : BoardCount {
+export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : BoardCount {
+  let boardTemp = angular.copy(board);
+  let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
+  if (!match || match.length === 0) {
+    throw new Error("Can only make a move for pet matches of 3 or over 3!");
+  }
   //window.alert(match.length);
   let count : number = 0;
   //mark elements to be removed
@@ -478,11 +485,16 @@ export function updateBoard(board : Board, match : lineDelta[]) : BoardCount {
     count : count
   };
 }
+
+export function getChangedDeltaBoardAndScores(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaBoardAndScores{
+  
+  let boardCount : BoardCount = updateBoard(board, match);
+}
 /** 
  * @ params stateAfterMove state before make move
  * @ return state after make move
  * **/
-function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, match : lineDelta[]) : IState {
+function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boardCount : BoardCount) : IState {
   //switch pets with pos of fromDelta and toDelta
   let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
   let toDelta : BoardDelta = stateBeforeMove.toDelta;
@@ -492,9 +504,10 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
   board[toDelta.row][toDelta.col] = tmpStr;
   //remove match >= 3, update score and board 
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
-  let boardCount : BoardCount = updateBoard(board, match);
+  
   stateAfterMove.board = boardCount.board;
   stateAfterMove.scores[turnIndexBeforeMove] = boardCount.count * 10;
+  stateAfterMove.boardCount = boardCount;
   return stateAfterMove;
 }
 
@@ -503,7 +516,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
    * with index turnIndexBeforeMove makes a move in cell row X col.
    */
   export function createMove(
-      stateBeforeMove : IState, turnIndexBeforeMove : number): IMove {
+      stateBeforeMove : IState, changedBoardCount : BoardCount, turnIndexBeforeMove : number): IMove {
     if (!stateBeforeMove) {
       stateBeforeMove = getInitialState();
     }
@@ -517,15 +530,9 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
     if (fromDelta.row !== toDelta.row && fromDelta.col !== toDelta.col) {
       throw new Error("Can only swap adjacent pets!");
     }
-    let boardTemp = angular.copy(board);
-    let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
-    if (!match) {
-      throw new Error("Can only make a move for pet matches of 3  or over 3!");
-    }
-    //window.alert(match.length);
-
+    
     //get state after movement 
-    let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, match);
+    let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
 
     let winner = getWinner(stateAfterMove);
     let endMatchScores : number[];
@@ -552,17 +559,16 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
         angular.equals(createInitialMove(), move)) {
       return;
     }
-
-    let expectedMove = createMove(stateBeforeMove ,turnIndexBeforeMove);
-    /*
+    let boardCount : BoardCount = stateTransition.move.stateAfterMove.boardCount;
+    let expectedMove = createMove(stateBeforeMove , boardCount, turnIndexBeforeMove);
     if (!angular.equals(move, expectedMove)) {
       throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
           ", but got stateTransition=" + angular.toJson(stateTransition, true))
-    } */
+    } 
   }
 
 
-  export function forSimpleTestHtml() : number {
+  export function forSimpleTestHtml() {
   let line1 : lineDelta = {
     startDelta : {
       row : 5,
@@ -576,7 +582,5 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, matc
   let lines : lineDelta[] = [];
   lines[0] = line1;
   let board : Board = getInitialBoard();
-  let bc : BoardCount = gameLogic.updateBoard(board,lines);
-  return bc.board.length;
   }
 }

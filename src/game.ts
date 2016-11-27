@@ -55,7 +55,7 @@ module game {
         dragAndDropService.addDragListener("gameArea", handleDragEvent);//'gameArea' here refers to the reference variable not the string literal representing the element id.
     }//addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
 
-    export function handleDragEvent(type : string, cx : number, cy : number) {//the 'event' parameter is not here but in the declaration - why? 
+    export function handleDragEvent(type : string, cx : number, cy : number) {
         log.log("type", type);
         log.log("cx " + cx);
         log.log("cy : " + cy);
@@ -66,8 +66,8 @@ module game {
         let y : number = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2);//the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
         log.log("x position : " + x);
         log.log("y position : " + y);
-        let dragAndDropPos = {//what is this?
-            top : y - cellSize.height * 0.605,//why 0.605?
+        let dragAndDropPos = {
+            top : y - cellSize.height * 0.605,
             left : x - cellSize.width * 0.605
         };
         let dragAndDropStart : any;
@@ -106,8 +106,10 @@ module game {
             if (dragOk(fromDelta, toDelta)) {//if human turn
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
+                let boardTemp = angular.copy(board);
+                let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
                 try {//calculate next move, if ilegal then report error.
-                    nextMove = gameLogic.createMove(state, currentUpdateUI.move.turnIndexAfterMove);
+                    nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
                 } catch (e) {
                     log.info(["Move is illegal:", e]);
                     endDragAndDrop();//move back to original position
