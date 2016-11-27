@@ -80,13 +80,14 @@ var game;
             if (dragOk(fromDelta, toDelta)) {
                 game.state.fromDelta = fromDelta;
                 game.state.toDelta = toDelta;
+                var boardTemp = angular.copy(game.state.board);
+                var changedBoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
                 try {
-                    nextMove = gameLogic.createMove(game.state, game.currentUpdateUI.move.turnIndexAfterMove);
+                    nextMove = gameLogic.createMove(game.state, changedBoardCount, game.currentUpdateUI.move.turnIndexAfterMove);
                 }
                 catch (e) {
                     log.info(["Move is illegal:", e]);
-                    // setDragAndDropElementPos(dragAndDropStart, cellSize);
-                    endDragAndDrop();
+                    endDragAndDrop(); //move back to original position
                     return;
                 }
                 makeMove(nextMove); //make legal move

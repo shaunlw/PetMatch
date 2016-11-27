@@ -31,13 +31,6 @@ module gameLogic {
     COLS : 9,
     TOTALSTEPS : 30
   };
-  
-  //alignment of 3
-  const SCORETYPE1 = 10;
-  //alignment of 4
-  const SCORETYPE2 = 20;
-  //alignment of 5
-  const SCORETYPE3 = 40;
   const NUM_PLAYERS = 2;
 
   /**
@@ -486,10 +479,11 @@ export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : Boa
   };
 }
 
+/*
 export function getChangedDeltaBoardAndScores(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaBoardAndScores{
   
   let boardCount : BoardCount = updateBoard(board, match);
-}
+} */
 /** 
  * @ params stateAfterMove state before make move
  * @ return state after make move
@@ -508,6 +502,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   stateAfterMove.board = boardCount.board;
   stateAfterMove.scores[turnIndexBeforeMove] = boardCount.count * 10;
   stateAfterMove.boardCount = boardCount;
+  stateAfterMove.completedSteps = stateBeforeMove.completedSteps + 1;
   return stateAfterMove;
 }
 

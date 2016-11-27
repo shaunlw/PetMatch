@@ -106,7 +106,7 @@ module game {
             if (dragOk(fromDelta, toDelta)) {//if human turn
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
-                let boardTemp = angular.copy(board);
+                let boardTemp = angular.copy(state.board);
                 let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
                 try {//calculate next move, if ilegal then report error.
                     nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
@@ -117,7 +117,6 @@ module game {
                 }
                 makeMove(nextMove);//make legal move
             }
-
         }
         if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
             endDragAndDrop();
