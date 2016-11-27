@@ -22,24 +22,24 @@ var gameLogic;
             ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
         ];
+        //window.alert(Math.floor(Math.random() * 4 + 1));
+        //let board : Board = getRandomBoard(); 
         return board;
     }
     gameLogic.getInitialBoard = getInitialBoard;
-    function getRandomBoard(board, startDelta, endDelta) {
-        var startRow = startDelta.row;
-        var startCol = startDelta.col;
-        var endRow = endDelta.row;
-        var endCol = endDelta.col;
-        for (var i = startRow; i < endRow; i++) {
+    function getRandomBoard() {
+        var board = [];
+        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
             board[i] = [];
-            for (var j = startCol; j < endCol; j++) {
+            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
                 board[i][j] = getRandomPet();
             }
         }
+        return board;
     }
     function getRandomPet() {
         var ans = "";
-        var randPet = Math.floor((Math.random() * 4) + 1);
+        var randPet = Math.floor(Math.random() * 4 + 1);
         if (randPet == 1) {
             ans = 'A';
         }
@@ -462,7 +462,7 @@ var gameLogic;
         //remove match >= 3, update score and board 
         var stateAfterMove = angular.copy(stateBeforeMove);
         stateAfterMove.board = boardCount.board;
-        stateAfterMove.scores[turnIndexBeforeMove] = boardCount.count * 10;
+        stateAfterMove.scores[turnIndexBeforeMove] += boardCount.count * 10;
         stateAfterMove.boardCount = boardCount;
         stateAfterMove.completedSteps = stateBeforeMove.completedSteps + 1;
         return stateAfterMove;

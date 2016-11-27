@@ -38,6 +38,7 @@ module gameLogic {
    *   a ROWSxCOLS matrix containing four types of pets. 
    **/
   export function getInitialBoard() : Board {
+    
     let board : Board = [
       ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
       ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
@@ -48,26 +49,26 @@ module gameLogic {
       ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
       ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
       ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-    ];
+    ];  
+    //window.alert(Math.floor(Math.random() * 4 + 1));
+    //let board : Board = getRandomBoard(); 
     return board;
   }
 
-  function getRandomBoard(board : Board, startDelta : BoardDelta, endDelta : BoardDelta) {
-    let startRow : number = startDelta.row;
-    let startCol : number = startDelta.col;
-    let endRow : number = endDelta.row;
-    let endCol : number = endDelta.col;
-    for (let i = startRow; i < endRow; i++) {
+  function getRandomBoard() : Board{
+    let board :Board = [];
+    for (let i = 0; i < PARAMS.ROWS; i++) {
       board[i] = [];
-      for (let j = startCol; j < endCol; j++) {
+      for (let j = 0; j < PARAMS.COLS; j++) {
         board[i][j] = getRandomPet();
       }  
     }
+    return board;
   }
 
   function getRandomPet() : string {
     let ans = "";
-    let randPet = Math.floor((Math.random() * 4) + 1);
+    let randPet = Math.floor(Math.random() * 4 + 1);
     if (randPet == 1) {
       ans = 'A';
     } else if (randPet == 2) {
@@ -500,7 +501,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
   
   stateAfterMove.board = boardCount.board;
-  stateAfterMove.scores[turnIndexBeforeMove] = boardCount.count * 10;
+  stateAfterMove.scores[turnIndexBeforeMove] += boardCount.count * 10;
   stateAfterMove.boardCount = boardCount;
   stateAfterMove.completedSteps = stateBeforeMove.completedSteps + 1;
   return stateAfterMove;

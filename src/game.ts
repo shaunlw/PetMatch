@@ -107,9 +107,16 @@ module game {
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
                 let boardTemp = angular.copy(state.board);
-                let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
-                try {//calculate next move, if ilegal then report error.
-                    nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
+
+                try{
+                     let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
+                     try {//calculate next move, if ilegal then report error.
+                         nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
+                        } catch (e) {
+                            log.info(["Move is illegal:", e]);
+                            endDragAndDrop();//move back to original position
+                            return;
+                        }
                 } catch (e) {
                     log.info(["Move is illegal:", e]);
                     endDragAndDrop();//move back to original position
