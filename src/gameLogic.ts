@@ -20,7 +20,7 @@ interface IState {
   toDelta : BoardDelta;
   //score for players of corresponding index 
   scores : number[];
-  completedSteps : number;
+  completedSteps : number[];
   boardCount : BoardCount;
 }
 
@@ -29,7 +29,7 @@ module gameLogic {
   export const PARAMS : any = {
     ROWS : 9,
     COLS : 9,
-    TOTALSTEPS : 30
+    TOTALSTEPS : 15
   };
   const NUM_PLAYERS = 2;
 
@@ -90,7 +90,7 @@ module gameLogic {
       fromDelta : null,
       toDelta : null,
       scores : scores,
-      completedSteps : 0,
+      completedSteps : [0,0],
       boardCount : null
     };
   }
@@ -132,11 +132,10 @@ module gameLogic {
    * @ Return The index of the winner with max score.
    **/
   function getWinner(curState : IState) : number {
-    let steps = curState.completedSteps;
     let scores = curState.scores;
     let max = 0;
     let maxIndex = -1;
-    if (steps >= PARAMS.TOTALSTEPS) {
+    if (curState.completedSteps[0] >= PARAMS.TOTALSTEPS && curState.completedSteps[1] >= PARAMS.TOTALSTEPS) {
       for ( let i = 0; i < scores.length; i++) {
         if (max < scores[i]) {
           max = scores[i];
@@ -501,9 +500,9 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
   
   stateAfterMove.board = boardCount.board;
-  stateAfterMove.scores[turnIndexBeforeMove] += boardCount.count * 10;
+  stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
   stateAfterMove.boardCount = boardCount;
-  stateAfterMove.completedSteps = stateBeforeMove.completedSteps + 1;
+  stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
   return stateAfterMove;
 }
 

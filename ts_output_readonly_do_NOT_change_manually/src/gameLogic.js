@@ -3,7 +3,7 @@ var gameLogic;
     gameLogic.PARAMS = {
         ROWS: 9,
         COLS: 9,
-        TOTALSTEPS: 30
+        TOTALSTEPS: 15
     };
     var NUM_PLAYERS = 2;
     /**
@@ -64,7 +64,7 @@ var gameLogic;
             fromDelta: null,
             toDelta: null,
             scores: scores,
-            completedSteps: 0,
+            completedSteps: [0, 0],
             boardCount: null
         };
     }
@@ -105,11 +105,10 @@ var gameLogic;
      * @ Return The index of the winner with max score.
      **/
     function getWinner(curState) {
-        var steps = curState.completedSteps;
         var scores = curState.scores;
         var max = 0;
         var maxIndex = -1;
-        if (steps >= gameLogic.PARAMS.TOTALSTEPS) {
+        if (curState.completedSteps[0] >= gameLogic.PARAMS.TOTALSTEPS && curState.completedSteps[1] >= gameLogic.PARAMS.TOTALSTEPS) {
             for (var i = 0; i < scores.length; i++) {
                 if (max < scores[i]) {
                     max = scores[i];
@@ -462,9 +461,9 @@ var gameLogic;
         //remove match >= 3, update score and board 
         var stateAfterMove = angular.copy(stateBeforeMove);
         stateAfterMove.board = boardCount.board;
-        stateAfterMove.scores[turnIndexBeforeMove] += boardCount.count * 10;
+        stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
         stateAfterMove.boardCount = boardCount;
-        stateAfterMove.completedSteps = stateBeforeMove.completedSteps + 1;
+        stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
         return stateAfterMove;
     }
     /**

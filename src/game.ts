@@ -19,8 +19,6 @@ interface TopLeft {
   left: number;
 }
 
-
-
 module game {
     let gameArea : HTMLElement = null;
     let PARAMS : any = gameLogic.PARAMS;
