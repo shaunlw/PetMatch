@@ -271,92 +271,83 @@ var gameLogic;
         }
         return match;
     }
-    function shouldShuffle(curState) {
-        var board = curState.board;
-        for (var row = 0; row < gameLogic.PARAMS.ROWS; row++) {
-            var count = 1;
-            var preType = board[row][0];
-            var col = 1;
-            while (col < gameLogic.PARAMS.COLS) {
-                if (board[row][col] == preType) {
-                    count++;
-                }
-                else {
-                    preType = board[row][col];
-                    count = 0;
-                }
-                if (count == 2) {
-                    col++;
-                }
-                if (count >= 3) {
-                    return true;
-                }
-                col++;
-            }
-            count = 1;
-            col = gameLogic.PARAMS.COLS - 2;
-            preType = board[row][gameLogic.PARAMS.COLS - 1];
-            while (col >= 0) {
-                if (board[row][col] == preType) {
-                    count++;
-                }
-                else {
-                    preType = board[row][col];
-                    count = 0;
-                }
-                if (count == 2) {
-                    col--;
-                }
-                if (count >= 3) {
-                    return true;
-                }
-                col--;
-            }
-        }
-        for (var col = 0; col < gameLogic.PARAMS.COLS; col++) {
-            var count = 1;
-            var preType = board[0][col];
-            var row = 1;
-            while (row < gameLogic.PARAMS.ROWS) {
-                if (board[row][col] == preType) {
-                    count++;
-                }
-                else {
-                    preType = board[row][col];
-                    count = 0;
-                }
-                if (count == 2) {
-                    row++;
-                }
-                if (count >= 3) {
-                    return true;
-                }
-                row++;
-            }
-            count = 1;
-            row = gameLogic.PARAMS.ROWS - 2;
-            preType = board[gameLogic.PARAMS.ROWS - 1][col];
-            while (row >= 0) {
-                if (board[row][col] == preType) {
-                    count++;
-                }
-                else {
-                    preType = board[row][col];
-                    count = 0;
-                }
-                if (count == 2) {
-                    row--;
-                }
-                if (count >= 3) {
-                    return true;
-                }
-                row--;
-            }
+    gameLogic.getMatch = getMatch;
+    function shouldShuffle(board) {
+        var petsToSwitch = getPossibleMove(board);
+        if (petsToSwitch.fromDelta.row === petsToSwitch.toDelta.row
+            && petsToSwitch.fromDelta.col === petsToSwitch.toDelta.col) {
+            return true;
         }
         return false;
     }
-    function shuffle(curState) {
-        return curState;
+    function shuffle() {
+        return getRandomBoard();
+    }
+    function getPossibleMove(board) {
+        var boardTemp = angular.copy(board);
+        var deltaF = {
+            row: 0,
+            col: 0
+        };
+        var deltaT = {
+            row: 0,
+            col: 0
+        };
+        var deltaFrom = {
+            row: 0,
+            col: 0
+        };
+        var deltaTo = {
+            row: 0,
+            col: 0
+        };
+        var match = [];
+        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
+            deltaF.row = i;
+            deltaT.row = i;
+            for (var j = 1; j < gameLogic.PARAMS.COLS; j++) {
+                deltaF.col = j;
+                deltaT.col = j - 1;
+                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                if (getMatchSize(tpMatch) > getMatchSize(match)) {
+                    match = tpMatch;
+                    deltaFrom.row = deltaF.row;
+                    deltaFrom.col = deltaF.col;
+                    deltaTo.row = deltaT.row;
+                    deltaTo.col = deltaT.col;
+                }
+            }
+        }
+        for (var i = 0; i < gameLogic.PARAMS.COLS; i++) {
+            deltaF.col = i;
+            deltaT.col = i;
+            for (var j = 1; j < gameLogic.PARAMS.ROWS; j++) {
+                deltaF.row = j;
+                deltaT.row = j - 1;
+                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                if (getMatchSize(tpMatch) > getMatchSize(match)) {
+                    match = tpMatch;
+                    deltaFrom.row = deltaF.row;
+                    deltaFrom.col = deltaF.col;
+                    deltaTo.row = deltaT.row;
+                    deltaTo.col = deltaT.col;
+                }
+            }
+        }
+        var possibleMove = {
+            fromDelta: deltaFrom,
+            toDelta: deltaTo
+        };
+        return possibleMove;
+    }
+    gameLogic.getPossibleMove = getPossibleMove;
+    function getMatchSize(match) {
+        var count = 0;
+        for (var i = 0; i < match.length; i++) {
+            var matchI = match[i];
+            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+        }
+        return count;
     }
     /**
      * Find match of 3 and over 3, update board
@@ -441,11 +432,6 @@ var gameLogic;
         };
     }
     gameLogic.updateBoard = updateBoard;
-    /*
-    export function getChangedDeltaBoardAndScores(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaBoardAndScores{
-      
-      let boardCount : BoardCount = updateBoard(board, match);
-    } */
     /**
      * @ params stateAfterMove state before make move
      * @ return state after make move
@@ -473,6 +459,9 @@ var gameLogic;
     function createMove(stateBeforeMove, changedBoardCount, turnIndexBeforeMove) {
         if (!stateBeforeMove) {
             stateBeforeMove = getInitialState();
+        }
+        if (shouldShuffle(stateBeforeMove.board)) {
+            stateBeforeMove.board = shuffle();
         }
         var board = stateBeforeMove.board;
         var fromDelta = stateBeforeMove.fromDelta;

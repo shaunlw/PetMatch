@@ -193,9 +193,9 @@ module game {
 
    function maybeSendComputerMove() {
        if (!isComputerTurn()) return;
-       //let move = aiService.findComputerMove(currentUpdateUI.move);
-       //log.info("Computer move: ", move);
-      // makeMove(move);
+       let move = aiService.findComputerMove(currentUpdateUI.move);
+       log.info("Computer move: ", move);
+       makeMove(move);
     }
 
     function registerServiceWorker() {
