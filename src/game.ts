@@ -105,7 +105,14 @@ module game {
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
                 //let boardTemp = angular.copy(state.board);
-
+                try {
+                    while (gameLogic.shouldShuffle(board)) {
+                    board = gameLogic.shuffle();
+                    }
+                } catch (e) {
+                    log.info(["error in shuffling:", e]);
+                }
+                
                 try{
                      let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                      try {//calculate next move, if ilegal then report error.
