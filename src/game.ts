@@ -104,10 +104,10 @@ module game {
             if (dragOk(fromDelta, toDelta)) {//if human turn
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
-                let boardTemp = angular.copy(state.board);
+                //let boardTemp = angular.copy(state.board);
 
                 try{
-                     let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
+                     let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                      try {//calculate next move, if ilegal then report error.
                          nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
                         } catch (e) {

@@ -403,6 +403,10 @@ export function getPossibleMove(board : Board) : petSwitch{
  * @ return board after update
  **/
 export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : BoardCount {
+  if (shouldShuffle(board)) {
+      board = shuffle();
+    }
+    //let board: Board = stateBeforeMove.board;
   let boardTemp = angular.copy(board);
   let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
   if (!match || match.length === 0) {
@@ -501,18 +505,14 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
 }
 
 /**
-   * Returns the move that should be performed when player
-   * with index turnIndexBeforeMove makes a move in cell row X col.
-   */
+* @ Return the move that should be performed when player
+* with index turnIndexBeforeMove makes a move in cell row X col.
+**/
   export function createMove(
       stateBeforeMove : IState, changedBoardCount : BoardCount, turnIndexBeforeMove : number): IMove {
     if (!stateBeforeMove) {
       stateBeforeMove = getInitialState();
     }
-    if (shouldShuffle(stateBeforeMove.board)) {
-      stateBeforeMove.board = shuffle();
-    }
-    let board: Board = stateBeforeMove.board;
     let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
     let toDelta : BoardDelta = stateBeforeMove.toDelta;
     
