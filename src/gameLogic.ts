@@ -11,6 +11,11 @@ interface BoardCount{
   board : Board;
   count : number;
 }
+
+interface petSwitch {
+  fromDelta : BoardDelta,
+  toDelta : BoardDelta
+}
  /** 
   * Record the state of current player.
   **/
@@ -26,7 +31,6 @@ interface IState {
 }
 
 module gameLogic {
-  
   export const PARAMS : any = {
     ROWS : 9,
     COLS : 9,
@@ -39,7 +43,6 @@ module gameLogic {
    *   a ROWSxCOLS matrix containing four types of pets. 
    **/
   export function getInitialBoard() : Board {
-    
     let board : Board = [
       ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
       ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
@@ -50,7 +53,7 @@ module gameLogic {
       ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
       ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
       ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-    ];  
+    ];   
     //window.alert(Math.floor(Math.random() * 4 + 1));
     //let board : Board = getRandomBoard(); 
     return board;
@@ -62,6 +65,7 @@ module gameLogic {
       board[i] = [];
       for (let j = 0; j < PARAMS.COLS; j++) {
         board[i][j] = getRandomPet();
+        //window.alert(board[i][j]);
       }  
     }
     return board;
@@ -81,6 +85,7 @@ module gameLogic {
     }
     return ans;
   }
+
   export function getInitialState() : IState {
     let scores : number[] = [];
     for (let i = 0; i < NUM_PLAYERS; i++) {
@@ -105,52 +110,28 @@ module gameLogic {
   }
 
   /**
-   * @ Return boolean value indicating whether there is a tie.
-   * @ Param current state values.
-   **/
-  function isTie(curState: IState): boolean {
-    let steps = curState.completedSteps;
-    let scores = curState.scores;
-    if (steps >= PARAMS.TOTALSTEPS && haveDuplicateScores(scores)) {
-      return true;
-    }
-    return false;
-  }
-
-  function haveDuplicateScores (scores : number[]) : boolean {
-    let counts : any = {};
-    for (let i = 0; i < scores.length; i++) {
-      if (counts[scores[i]]) {
-        return true;
-      } else {
-        counts[scores[i]] = 1;
-      }
-    }
-    return false;
-  }
-
-  /**
    * @ Return The index of the winner with max score.
    **/
   function getWinner(curState : IState) : number {
     let scores = curState.scores;
-    let max = 0;
-    let maxIndex = -1;
     if (curState.completedSteps[0] >= PARAMS.TOTALSTEPS && curState.completedSteps[1] >= PARAMS.TOTALSTEPS) {
-      for ( let i = 0; i < scores.length; i++) {
-        if (max < scores[i]) {
-          max = scores[i];
-          maxIndex = i;
-        }
+      //tie
+      if (scores[0] === scores[1]) {
+        return -2;
       }
+      // player 0 wins
+      if (scores[0] > scores[1]) {
+        return 0;
+      }
+      return 1;
     }
-    return maxIndex;
+    return -1;
   }
 
   /**
    * @ Return info of all matched pets with pet in fromDelta or toDelta.
    **/
-   function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
+   export function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
     
     let match : lineDelta[] = [];
     /*
@@ -311,93 +292,86 @@ module gameLogic {
     return match;
   }
 
-
-function shouldShuffle(curState : IState) : boolean {
-  let board : Board = curState.board;
-  for (let row : number = 0; row < PARAMS.ROWS; row++) {
-    let count : number = 1;
-    let preType : string = board[row][0];
-    let col : number = 1;
-    while (col < PARAMS.COLS) {
-      if (board[row][col] == preType) {
-        count++;
-      } else {
-        preType = board[row][col];
-        count = 0;
-      }
-      if (count == 2) {
-        col++;
-      }
-      if (count >= 3) {
-        return true;
-      }
-      col++;
-    }
-    count = 1;
-    col = PARAMS.COLS - 2;
-    preType = board[row][PARAMS.COLS - 1];
-    while (col >= 0) {
-      if (board[row][col] == preType) {
-        count++;
-      } else {
-        preType = board[row][col];
-        count = 0;
-      }
-      if (count == 2) {
-        col--;
-      }
-      if (count >= 3) {
-        return true;
-      }
-      col--;
-    }
-  }
-  
-  for (let col : number = 0; col < PARAMS.COLS; col++) {
-    let count : number = 1;
-    let preType : string = board[0][col];
-    let row : number = 1;
-    while (row < PARAMS.ROWS) {
-      if (board[row][col] == preType) {
-        count++;
-      } else {
-        preType = board[row][col];
-        count = 0;
-      }
-      if (count == 2) {
-        row++;
-      }
-      if (count >= 3) {
-        return true;
-      }
-      row++;
-    }
-    count = 1;
-    row = PARAMS.ROWS - 2;
-    preType = board[PARAMS.ROWS - 1][col];
-    while (row >= 0) {
-      if (board[row][col] == preType) {
-        count++;
-      } else {
-        preType = board[row][col];
-        count = 0;
-      }
-      if (count == 2) {
-        row--;
-      }
-      if (count >= 3) {
-        return true;
-      }
-      row--;
-    }
+export function shouldShuffle(board : Board) : boolean {
+  let petsToSwitch : petSwitch = getPossibleMove(board);
+  if (petsToSwitch.fromDelta.row ===  petsToSwitch.toDelta.row 
+        && petsToSwitch.fromDelta.col ===  petsToSwitch.toDelta.col) {
+          return true;
   }
   return false;
 }
 
-function shuffle(curState : IState) : IState {
-
-  return curState;
+export function shuffle() : Board {
+  return getRandomBoard();
 }
+
+export function getPossibleMove(board : Board) : petSwitch{
+        let boardTemp = angular.copy(board);
+        let deltaF : BoardDelta = {
+            row : 0,
+            col : 0
+        };
+        let deltaT : BoardDelta = {
+            row : 0,
+            col : 0
+        };
+        let deltaFrom : BoardDelta = {
+            row : 0,
+            col : 0
+        };
+        let deltaTo: BoardDelta = {
+            row : 0,
+            col : 0
+        };
+        let match : lineDelta[] = [];
+
+        for (let i = 0; i < gameLogic.PARAMS.ROWS; i++) {
+            deltaF.row = i;
+            deltaT.row = i;
+            for (let j = 1; j < gameLogic.PARAMS.COLS; j++) {
+                deltaF.col = j;
+                deltaT.col = j - 1;
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                if (getMatchSize(tpMatch) > getMatchSize(match)) {
+                    match = tpMatch;
+                    deltaFrom.row = deltaF.row;
+                    deltaFrom.col = deltaF.col;
+                    deltaTo.row = deltaT.row;
+                    deltaTo.col = deltaT.col;
+                }
+            }
+        }
+        for (let i = 0; i < gameLogic.PARAMS.COLS; i++) {
+            deltaF.col = i;
+            deltaT.col = i;
+            for (let j = 1; j < gameLogic.PARAMS.ROWS; j++) {
+                deltaF.row = j;
+                deltaT.row = j - 1;
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                if (getMatchSize(tpMatch) > getMatchSize(match)) {
+                    match = tpMatch;
+                    deltaFrom.row = deltaF.row;
+                    deltaFrom.col = deltaF.col;
+                    deltaTo.row = deltaT.row;
+                    deltaTo.col = deltaT.col;
+                }
+            }
+        }
+        let possibleMove : petSwitch = {
+            fromDelta : deltaFrom,
+            toDelta : deltaTo
+        }
+        return possibleMove;
+    }
+    
+    function getMatchSize(match : lineDelta[]) : number {
+        let count : number = 0;
+        for (let i = 0; i < match.length; i++) {
+            let matchI : lineDelta = match[i];
+            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+        }
+        return count;
+    }
 
 /** 
  * Find match of 3 and over 3, update board
@@ -405,6 +379,7 @@ function shuffle(curState : IState) : IState {
  * @ return board after update
  **/
 export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : BoardCount {
+    //let board: Board = stateBeforeMove.board;
   let boardTemp = angular.copy(board);
   let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
   if (!match || match.length === 0) {
@@ -480,11 +455,6 @@ export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : Boa
   };
 }
 
-/*
-export function getChangedDeltaBoardAndScores(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaBoardAndScores{
-  
-  let boardCount : BoardCount = updateBoard(board, match);
-} */
 /** 
  * @ params stateAfterMove state before make move
  * @ return state after make move
@@ -508,19 +478,20 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
 }
 
 /**
-   * Returns the move that should be performed when player
-   * with index turnIndexBeforeMove makes a move in cell row X col.
-   */
+* @ Return the move that should be performed when player
+* with index turnIndexBeforeMove makes a move in cell row X col.
+**/
   export function createMove(
       stateBeforeMove : IState, changedBoardCount : BoardCount, turnIndexBeforeMove : number): IMove {
     if (!stateBeforeMove) {
       stateBeforeMove = getInitialState();
     }
-    let board: Board = stateBeforeMove.board;
     let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
     let toDelta : BoardDelta = stateBeforeMove.toDelta;
+    
     //let scores : number[] = stateBeforeMove.scores;
-    if (getWinner(stateBeforeMove) !== -1 || isTie(stateBeforeMove)) {
+    let winner = getWinner(stateBeforeMove);
+    if ( winner !== -1 || winner === -2) {
       throw new Error("Can only make a move if the game is not over!");
     }
     if (fromDelta.row !== toDelta.row && fromDelta.col !== toDelta.col) {
@@ -530,13 +501,16 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
 
-    let winner = getWinner(stateAfterMove);
+    winner = getWinner(stateAfterMove);
     let endMatchScores : number[];
     let turnIndexAfterMove : number;
-    if (winner !== -1 || isTie(stateAfterMove)) {
-      // Game over.
+    // Game over.
+    if (winner === -2) {
       turnIndexAfterMove = -1;
-      endMatchScores = winner === 0 ? [1, 0] : winner === 1 ? [0, 1] : [0, 0];
+      endMatchScores = [0, 0];
+    } else if (winner !== -1) {
+      turnIndexAfterMove = -1;
+      endMatchScores = winner === 0 ? [1, 0] : [0, 1];
     } else {
       // Game continues. Now it's the opponent's turn (the turn switches from 0 to 1 and 1 to 0).
       turnIndexAfterMove = 1 - turnIndexBeforeMove;

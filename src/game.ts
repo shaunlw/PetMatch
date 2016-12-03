@@ -104,10 +104,17 @@ module game {
             if (dragOk(fromDelta, toDelta)) {//if human turn
                 state.fromDelta = fromDelta;
                 state.toDelta = toDelta;
-                let boardTemp = angular.copy(state.board);
-
+                //let boardTemp = angular.copy(state.board);
+                try {
+                    while (gameLogic.shouldShuffle(board)) {
+                    board = gameLogic.shuffle();
+                    }
+                } catch (e) {
+                    log.info(["error in shuffling:", e]);
+                }
+                
                 try{
-                     let changedBoardCount : BoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
+                     let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                      try {//calculate next move, if ilegal then report error.
                          nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
                         } catch (e) {
@@ -193,9 +200,9 @@ module game {
 
    function maybeSendComputerMove() {
        if (!isComputerTurn()) return;
-       //let move = aiService.findComputerMove(currentUpdateUI.move);
-       //log.info("Computer move: ", move);
-      // makeMove(move);
+       let move = aiService.findComputerMove(currentUpdateUI.move);
+       log.info("Computer move: ", move);
+       makeMove(move);
     }
 
     function registerServiceWorker() {
