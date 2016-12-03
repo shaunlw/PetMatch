@@ -22,6 +22,7 @@ interface IState {
   scores : number[];
   completedSteps : number[];
   boardCount : BoardCount;
+  
 }
 
 module gameLogic {
