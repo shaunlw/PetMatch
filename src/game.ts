@@ -224,15 +224,15 @@ module game {
 
     export function getMoveDownClass(row: number, col: number): string {//find out how many steps a ball,if needed, should move down
         let res = 0;
-        if (state.changed_delta){//if there is at least one modified cell
-        for (let i = 0; i < state.changed_delta.length; i++) {//for each modified cell
-            if (state.changed_delta[i].row >= row && state.changed_delta[i].col === col) {//only need to move if the modified cell is below you (bigger row # and same col #)
+        if (state.changedDelta){//if there is at least one modified cell
+        for (let i = 0; i < state.changedDelta.length; i++) {//for each modified cell
+            if (state.changedDelta[i].row >= row && state.changedDelta[i].col === col) {//only need to move if the modified cell is below you (bigger row # and same col #)
                 res++;//sum up how many cells below you have been modified; this is the number of steps you need to move down.
             }
         }
         }
-        log.info("test it out", animationEnded, row, col, res, state.changed_delta);
-        if (res !== 0 && !animationEnded && state.changed_delta)//you [(raw,col) passed to this function] cam move down only if: 1. there is modified cells below you and 2. animation has not been marked as finished.
+        log.info("test it out", animationEnded, row, col, res, state.changedDelta);
+        if (res !== 0 && !changedDelta && state.changedDelta)//you [(raw,col) passed to this function] cam move down only if: 1. there is modified cells below you and 2. animation has not been marked as finished.
         return 'movedown'+res;//return how many steps you need to move down
         return '';//you don't need to move'
     }
