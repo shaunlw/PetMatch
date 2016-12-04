@@ -7,7 +7,8 @@ interface lineDelta {
   startDelta : BoardDelta;
   endDelta : BoardDelta;
 }
-interface BoardCount{
+interface changedDeltaAndBoardCount{
+  changedDelta : BoardDelta[];
   board : Board;
   count : number;
 }
@@ -26,7 +27,6 @@ interface IState {
   //score for players of corresponding index 
   scores : number[];
   completedSteps : number[];
-  boardCount : BoardCount;
   changedDelta : BoardDelta[];
 }
 
@@ -110,7 +110,6 @@ module gameLogic {
       toDelta : null,
       scores : scores,
       completedSteps : [0,0],
-      boardCount : null,
       changedDelta : null
     };
   }
@@ -405,19 +404,57 @@ export function getPossibleMove(board : Board) : petSwitch{
         return count;
     }
 
+function getChangedDelta(match : lineDelta[]) : BoardDelta[] {
+  let changedDelta : BoardDelta[] = [];
+  let visited : boolean[][] = [];
+  for (let row = 0; row < PARAMS.ROWS; row++) {
+    visited[row] = [];
+    for (let col = 0; col < PARAMS.COLS; col++) {
+      visited[row][col] = false;
+    }
+  }
+  for (let i = 0; i < match.length; i++) {
+    let line : lineDelta = match[i];
+    if (!line) {
+      throw new Error("line is empty!");   
+    }
+    if (line.startDelta.row === line.endDelta.row) {
+      let row : number = line.startDelta.row;
+      for (let col : number = line.startDelta.col; col <= line.endDelta.col; col++)  {
+        for (let i = row; i >= 0; i--) {
+          if (!visited[i][col]) {
+            visited[i][col] = true;
+            changedDelta.push({row : i, col : col});
+          }
+        }
+      }
+    } else if (line.startDelta.col === line.endDelta.col) {
+      let col : number = line.startDelta.col;
+      for (let row : number = Math.max(line.startDelta.row, line.endDelta.row); row >= 0; row--)  {
+        if (!visited[row][col]) {
+          visited[row][col] = true;
+          changedDelta.push({row : row, col : col});
+        }
+      }
+    } else {
+          throw new Error("Error in getting match, should have same col or row!");   
+    }
+  }
+  return changedDelta;
+}
 /** 
  * Find match of 3 and over 3, update board
  * @ board board before update
  * @ return board after update
  **/
-export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : BoardCount {
-    //let board: Board = stateBeforeMove.board;
+export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaAndBoardCount {
   let boardTemp = angular.copy(board);
   let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
   if (!match || match.length === 0) {
     throw new Error("Can only make a move for pet matches of 3 or over 3!");
   }
-  //window.alert(match.length);
+  let changedDelta : BoardDelta[] = getChangedDelta(match);
+  
   let count : number = 0;
   //mark elements to be removed
   let visited : boolean[][] = [];
@@ -478,28 +515,17 @@ export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : Boa
     }
   }
   return {
+    changedDelta : changedDelta,
     board : newBoard,  
     count : count
   };
-}
-
-function getChangedDelta(board1 : Board, board2 : Board) : BoardDelta[] {
-  let changedDelta : BoardDelta[] = [];
-  for (let i = 0; i < PARAMS.ROWS; i++) {
-    for (let j = 0; j < PARAMS.COLS; j++) {
-      if (!angular.equals(board1[i][j], board2[i][j])) {
-        changedDelta.push({row : i, col : j});
-      }
-    }
-  }
-  return changedDelta;
 }
 
 /** 
  * @ params stateAfterMove state before make move
  * @ return state after make move
  * **/
-function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boardCount : BoardCount) : IState {
+function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boardCount : changedDeltaAndBoardCount) : IState {
   //switch pets with pos of fromDelta and toDelta
   let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
   let toDelta : BoardDelta = stateBeforeMove.toDelta;
@@ -509,10 +535,9 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   board[toDelta.row][toDelta.col] = tmpStr;
   //remove match >= 3, update score and board 
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
-  stateAfterMove.changedDelta = getChangedDelta(boardCount.board, stateBeforeMove.board);
+  stateAfterMove.changedDelta = boardCount.changedDelta;
   stateAfterMove.board = boardCount.board;
   stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
-  stateAfterMove.boardCount = boardCount;
   stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
   return stateAfterMove;
 }
@@ -541,7 +566,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     } 
     stateBeforeMove.fromDelta = fromDelta;
     stateBeforeMove.toDelta = fromDelta;
-    let changedBoardCount : BoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
+    let changedBoardCount : changedDeltaAndBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
     stateAfterMove.fromDelta = fromDelta;
