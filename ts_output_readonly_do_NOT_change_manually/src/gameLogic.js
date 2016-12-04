@@ -6,24 +6,37 @@ var gameLogic;
         TOTALSTEPS: 15
     };
     var NUM_PLAYERS = 2;
+    var NUM_TYPES = 4;
     /**
      * @ Return the initial PetMatch board.
      *   a ROWSxCOLS matrix containing four types of pets.
      **/
     function getInitialBoard() {
-        var board = [
-            ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
-            ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
-            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
-            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
-            ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
-            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
-            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
-            ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
-            ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-        ];
-        //window.alert(Math.floor(Math.random() * 4 + 1));
-        //let board : Board = getRandomBoard(); 
+        /*
+         let board : Board = [
+           ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
+           ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
+           ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
+           ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
+           ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
+           ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
+           ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
+           ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
+           ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
+         ];     */
+        var board = [];
+        //let board :Board = getRandomBoard();
+        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
+            board[i] = [];
+            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
+                board[i][j] = getRandomPet();
+            }
+        }
+        //some errors need to be corrected for shouldshuffle
+        /*
+        while (shouldShuffle) {
+          board = getRandomBoard();
+        } */
         return board;
     }
     gameLogic.getInitialBoard = getInitialBoard;
@@ -39,17 +52,17 @@ var gameLogic;
     }
     function getRandomPet() {
         var ans = "";
-        var randPet = Math.floor(Math.random() * 4 + 1);
-        if (randPet == 1) {
+        var randPet = Math.floor(Math.random() * NUM_TYPES + 1);
+        if (randPet === 1) {
             ans = 'A';
         }
-        else if (randPet == 2) {
+        else if (randPet === 2) {
             ans = 'B';
         }
-        else if (randPet == 3) {
+        else if (randPet === 3) {
             ans = 'C';
         }
-        else {
+        else if (randPet === 4) {
             ans = 'D';
         }
         return ans;
@@ -65,7 +78,8 @@ var gameLogic;
             toDelta: null,
             scores: scores,
             completedSteps: [0, 0],
-            boardCount: null
+            boardCount: null,
+            changedDelta: null
         };
     }
     gameLogic.getInitialState = getInitialState;
@@ -84,7 +98,13 @@ var gameLogic;
     function isTie(curState) {
         var steps = curState.completedSteps;
         var scores = curState.scores;
-        if (steps >= gameLogic.PARAMS.TOTALSTEPS && haveDuplicateScores(scores)) {
+        var stepsReached = true;
+        for (var i = 0; i < steps.length; i++) {
+            if (steps[i] < gameLogic.PARAMS.TOTALSTEPS) {
+                stepsReached = false;
+            }
+        }
+        if (stepsReached && haveDuplicateScores(scores)) {
             return true;
         }
         return false;
@@ -105,29 +125,33 @@ var gameLogic;
      * @ Return The index of the winner with max score.
      **/
     function getWinner(curState) {
+        if (isTie(curState)) {
+            return '';
+        }
+        var steps = curState.completedSteps;
+        var stepsReached = true;
+        for (var i = 0; i < steps.length; i++) {
+            if (steps[i] < gameLogic.PARAMS.TOTALSTEPS) {
+                stepsReached = false;
+            }
+        }
         var scores = curState.scores;
-        var max = 0;
-        var maxIndex = -1;
-        if (curState.completedSteps[0] >= gameLogic.PARAMS.TOTALSTEPS && curState.completedSteps[1] >= gameLogic.PARAMS.TOTALSTEPS) {
+        if (stepsReached) {
+            var max = Math.max.apply(null, scores);
+            ;
             for (var i = 0; i < scores.length; i++) {
-                if (max < scores[i]) {
-                    max = scores[i];
-                    maxIndex = i;
+                if (max === scores[i]) {
+                    return i + '';
                 }
             }
         }
-        return maxIndex;
+        return '';
     }
     /**
      * @ Return info of all matched pets with pet in fromDelta or toDelta.
      **/
     function getMatch(board, fromDelta, toDelta) {
         var match = [];
-        /*
-        let COLL : number = Math.min(fromDelta.col, toDelta.col);
-        let COLR : number = Math.max(fromDelta.col, toDelta.col);
-        let ROWL : number = Math.min(fromDelta.row, toDelta.row);
-        let ROWR : number = Math.max(fromDelta.col, toDelta.col); */
         var i = 0;
         //swap on temp board
         var petFrom = board[fromDelta.row][fromDelta.col];
@@ -156,7 +180,6 @@ var gameLogic;
             }
         }
         endDelta.col = col - 1;
-        // window.alert("end col " + endDelta.col);
         for (col = fromDelta.col - 1; col >= 0; col--) {
             if (board[fromDelta.row][col] === target) {
                 count++;
@@ -166,8 +189,6 @@ var gameLogic;
             }
         }
         startDelta.col = col + 1;
-        //window.alert("start col " + startDelta.col);
-        //window.alert("count " + count);
         if (count >= 3) {
             var lDelta = {
                 startDelta: startDelta,
@@ -280,9 +301,11 @@ var gameLogic;
         }
         return false;
     }
+    gameLogic.shouldShuffle = shouldShuffle;
     function shuffle() {
         return getRandomBoard();
     }
+    gameLogic.shuffle = shuffle;
     function getPossibleMove(board) {
         var boardTemp = angular.copy(board);
         var deltaF = {
@@ -355,6 +378,7 @@ var gameLogic;
      * @ return board after update
      **/
     function updateBoard(board, fromDelta, toDelta) {
+        //let board: Board = stateBeforeMove.board;
         var boardTemp = angular.copy(board);
         var match = getMatch(boardTemp, fromDelta, toDelta);
         if (!match || match.length === 0) {
@@ -377,13 +401,9 @@ var gameLogic;
             }
             if (line.startDelta.row === line.endDelta.row) {
                 var row = line.startDelta.row;
-                //window.alert("row " + row);
-                //window.alert("start col " + line.startDelta.col + " end col " + line.endDelta.col);
                 for (var col = line.startDelta.col; col <= line.endDelta.col; col++) {
-                    //window.alert("cell1 " + " row " + row + " col " + col)
                     if (!visited[row][col]) {
                         visited[row][col] = true;
-                        //window.alert("cell " + " row " + row + " col " + col);
                         count++;
                     }
                 }
@@ -432,6 +452,17 @@ var gameLogic;
         };
     }
     gameLogic.updateBoard = updateBoard;
+    function getChangedDelta(board1, board2) {
+        var changedDelta = [];
+        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
+            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
+                if (!angular.equals(board1[i][j], board2[i][j])) {
+                    changedDelta.push({ row: i, col: j });
+                }
+            }
+        }
+        return changedDelta;
+    }
     /**
      * @ params stateAfterMove state before make move
      * @ return state after make move
@@ -446,6 +477,7 @@ var gameLogic;
         board[toDelta.row][toDelta.col] = tmpStr;
         //remove match >= 3, update score and board 
         var stateAfterMove = angular.copy(stateBeforeMove);
+        stateAfterMove.changedDelta = getChangedDelta(boardCount.board, stateBeforeMove.board);
         stateAfterMove.board = boardCount.board;
         stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
         stateAfterMove.boardCount = boardCount;
@@ -453,35 +485,39 @@ var gameLogic;
         return stateAfterMove;
     }
     /**
-       * Returns the move that should be performed when player
-       * with index turnIndexBeforeMove makes a move in cell row X col.
-       */
-    function createMove(stateBeforeMove, changedBoardCount, turnIndexBeforeMove) {
+    * @ Return the move that should be performed when player
+    * with index turnIndexBeforeMove makes a move in cell row X col.
+    **/
+    function createMove(stateBeforeMove, fromDelta, toDelta, turnIndexBeforeMove) {
         if (!stateBeforeMove) {
             stateBeforeMove = getInitialState();
         }
-        if (shouldShuffle(stateBeforeMove.board)) {
-            stateBeforeMove.board = shuffle();
-        }
-        var board = stateBeforeMove.board;
-        var fromDelta = stateBeforeMove.fromDelta;
-        var toDelta = stateBeforeMove.toDelta;
+        //let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
+        //let toDelta : BoardDelta = stateBeforeMove.toDelta;
         //let scores : number[] = stateBeforeMove.scores;
-        if (getWinner(stateBeforeMove) !== -1 || isTie(stateBeforeMove)) {
+        if (isTie(stateBeforeMove) || getWinner(stateBeforeMove) !== '') {
             throw new Error("Can only make a move if the game is not over!");
         }
-        if (fromDelta.row !== toDelta.row && fromDelta.col !== toDelta.col) {
+        if (!fromDelta || !toDelta) {
+            throw new Error("Cannot have empty delta value!");
+        }
+        if (angular.equals(fromDelta, toDelta)) {
             throw new Error("Can only swap adjacent pets!");
         }
+        stateBeforeMove.fromDelta = fromDelta;
+        stateBeforeMove.toDelta = fromDelta;
+        var changedBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
         //get state after movement 
         var stateAfterMove = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
+        stateAfterMove.fromDelta = fromDelta;
+        stateAfterMove.toDelta = toDelta;
         var winner = getWinner(stateAfterMove);
         var endMatchScores;
         var turnIndexAfterMove;
-        if (winner !== -1 || isTie(stateAfterMove)) {
+        if (winner !== '' || isTie(stateAfterMove)) {
             // Game over.
             turnIndexAfterMove = -1;
-            endMatchScores = winner === 0 ? [1, 0] : winner === 1 ? [0, 1] : [0, 0];
+            endMatchScores = winner === '0' ? [1, 0] : winner === '1' ? [0, 1] : [0, 0];
         }
         else {
             // Game continues. Now it's the opponent's turn (the turn switches from 0 to 1 and 1 to 0).
@@ -501,28 +537,19 @@ var gameLogic;
             angular.equals(createInitialMove(), move)) {
             return;
         }
-        var boardCount = stateTransition.move.stateAfterMove.boardCount;
-        var expectedMove = createMove(stateBeforeMove, boardCount, turnIndexBeforeMove);
+        var fromDelta = stateTransition.move.stateAfterMove.fromDelta;
+        var toDelta = stateTransition.move.stateAfterMove.toDelta;
+        var expectedMove = createMove(stateBeforeMove, fromDelta, toDelta, turnIndexBeforeMove);
         if (!angular.equals(move, expectedMove)) {
             throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
                 ", but got stateTransition=" + angular.toJson(stateTransition, true));
         }
     }
     gameLogic.checkMoveOk = checkMoveOk;
+    function checkMoveOkN(stateTransition) {
+    }
+    gameLogic.checkMoveOkN = checkMoveOkN;
     function forSimpleTestHtml() {
-        var line1 = {
-            startDelta: {
-                row: 5,
-                col: 5
-            },
-            endDelta: {
-                row: 8,
-                col: 5
-            }
-        };
-        var lines = [];
-        lines[0] = line1;
-        var board = getInitialBoard();
     }
     gameLogic.forSimpleTestHtml = forSimpleTestHtml;
 })(gameLogic || (gameLogic = {}));

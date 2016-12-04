@@ -46,7 +46,7 @@ module game {
         moveService.setGame({
         minNumberOfPlayers: 2,
         maxNumberOfPlayers: 2,
-        checkMoveOk: gameLogic.checkMoveOk,
+        checkMoveOk: gameLogic.checkMoveOkN,
         updateUI: updateUI,
         gotMessageFromPlatform: null,
         });
@@ -102,31 +102,14 @@ module game {
             };
             let nextMove : IMove = null;
             if (dragOk(fromDelta, toDelta)) {//if human turn
-                state.fromDelta = fromDelta;
-                state.toDelta = toDelta;
-                //let boardTemp = angular.copy(state.board);
-                try {
-                    while (gameLogic.shouldShuffle(board)) {
-                    board = gameLogic.shuffle();
-                    }
-                } catch (e) {
-                    log.info(["error in shuffling:", e]);
-                }
-                
-                try{
-                     let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
+                     //let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                      try {//calculate next move, if ilegal then report error.
-                         nextMove = gameLogic.createMove(state, changedBoardCount, currentUpdateUI.move.turnIndexAfterMove);
+                         nextMove = gameLogic.createMove(state, fromDelta, toDelta, currentUpdateUI.move.turnIndexAfterMove);
                         } catch (e) {
                             log.info(["Move is illegal:", e]);
                             endDragAndDrop();//move back to original position
                             return;
                         }
-                } catch (e) {
-                    log.info(["Move is illegal:", e]);
-                    endDragAndDrop();//move back to original position
-                    return;
-                }
                 makeMove(nextMove);//make legal move
             }
         }
@@ -159,9 +142,9 @@ module game {
     style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
   }
 
-    /**
-   * Get the position of the cell.
-   */
+ /**
+  * Get the position of the cell.
+  **/
   function getCellPos(row: number, col: number, cellSize: CellSize): TopLeft {
     let top: number = row * cellSize.height;
     let left: number = col * cellSize.width;

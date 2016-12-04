@@ -24,7 +24,7 @@ var game;
         moveService.setGame({
             minNumberOfPlayers: 2,
             maxNumberOfPlayers: 2,
-            checkMoveOk: gameLogic.checkMoveOk,
+            checkMoveOk: gameLogic.checkMoveOkN,
             updateUI: updateUI,
             gotMessageFromPlatform: null,
         });
@@ -78,19 +78,9 @@ var game;
             };
             var nextMove = null;
             if (dragOk(fromDelta, toDelta)) {
-                game.state.fromDelta = fromDelta;
-                game.state.toDelta = toDelta;
-                var boardTemp = angular.copy(game.state.board);
+                //let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                 try {
-                    var changedBoardCount = gameLogic.updateBoard(boardTemp, fromDelta, toDelta);
-                    try {
-                        nextMove = gameLogic.createMove(game.state, changedBoardCount, game.currentUpdateUI.move.turnIndexAfterMove);
-                    }
-                    catch (e) {
-                        log.info(["Move is illegal:", e]);
-                        endDragAndDrop(); //move back to original position
-                        return;
-                    }
+                    nextMove = gameLogic.createMove(game.state, fromDelta, toDelta, game.currentUpdateUI.move.turnIndexAfterMove);
                 }
                 catch (e) {
                     log.info(["Move is illegal:", e]);
@@ -128,8 +118,8 @@ var game;
         style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
     }
     /**
-   * Get the position of the cell.
-   */
+     * Get the position of the cell.
+     **/
     function getCellPos(row, col, cellSize) {
         var top = row * cellSize.height;
         var left = col * cellSize.width;
