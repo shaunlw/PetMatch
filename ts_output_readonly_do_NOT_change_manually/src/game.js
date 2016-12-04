@@ -194,6 +194,21 @@ var game;
             game.dragAndDropElement.removeAttribute("style");
         game.dragAndDropElement = null;
     }
+    function getMoveDownClass(row, col) {
+        var res = 0;
+        if (game.state.changedDelta) {
+            for (var i = 0; i < game.state.changedDelta.length; i++) {
+                if (game.state.changedDelta[i].row >= row && game.state.changedDelta[i].col === col) {
+                    res++; //sum up how many cells below you have been modified; this is the number of steps you need to move down.
+                }
+            }
+        }
+        log.info("test it out", row, col, res, game.state.changedDelta);
+        if (res !== 0 && game.state.changedDelta)
+            return 'movedown' + res; //return how many steps you need to move down
+        return ''; //you don't need to move'
+    }
+    game.getMoveDownClass = getMoveDownClass;
     function makeMove(move) {
         if (game.didMakeMove) {
             return;

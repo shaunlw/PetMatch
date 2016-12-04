@@ -61,42 +61,36 @@ body {
 }
 
 .movedown1 {
-  
-  animation: movedown1 0.25s ease-in-out;
+  animation: movedown1 .25s ease-in-out;
+  /*background-color:blue;*/
+  /*border-radius: 50%;*/
 }
 
 .movedown2 {
-  
-  animation: movedown2 0.5s ease-in-out;
+  animation: movedown2 .5s ease-in-out;
 }
 
 .movedown3 {
-  animation: movedown3 0.75s ease-in-out;
-  
+  animation: movedown3 .75s ease-in-out;
 }
 
 .movedown4 {
-  
   animation: movedown4 1s ease-in-out;
 }
 
-.movedown5 {
-  
+.movedown5 {  
   animation: movedown5 1.25s ease-in-out;
 }
 
-.movedown6 {
-  
+.movedown6 {  
   animation: movedown6 1.5s ease-in-out;
 }
 
-.movedown7 {
-  
+.movedown7 {  
   animation: movedown7 1.75s ease-in-out;
 }
 
-.movedown8 {
-  
+.movedown8 {  
   animation: movedown8 2s ease-in-out;
 }
 
