@@ -27,7 +27,11 @@ interface IState {
   scores : number[];
   completedSteps : number[];
   boardCount : BoardCount;
+<<<<<<< HEAD
   changedDelta : BoardDelta[];
+=======
+  
+>>>>>>> 3bb9737df6147bd0aa486ad190ecc788450c38e9
 }
 
 module gameLogic {
