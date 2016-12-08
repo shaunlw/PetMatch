@@ -231,7 +231,7 @@ module game {
             }
         }
         }
-        log.info("test it out", row, col, res, state.changedDelta);
+        // log.info("test it out", row, col, res, state.changedDelta);
         if (res !== 0 && state.changedDelta)//you [(raw,col) passed to this function] cam move down only if: 1. there is modified cells below you and 2. animation has not been marked as finished.
         return 'movedown'+res;//return how many steps you need to move down
         return '';//you don't need to move'

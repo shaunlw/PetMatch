@@ -78,7 +78,6 @@ var gameLogic;
             toDelta: null,
             scores: scores,
             completedSteps: [0, 0],
-            boardCount: null,
             changedDelta: null
         };
     }
@@ -372,19 +371,58 @@ var gameLogic;
         }
         return count;
     }
+    function getChangedDelta(match) {
+        var changedDelta = [];
+        var visited = [];
+        for (var row = 0; row < gameLogic.PARAMS.ROWS; row++) {
+            visited[row] = [];
+            for (var col = 0; col < gameLogic.PARAMS.COLS; col++) {
+                visited[row][col] = false;
+            }
+        }
+        for (var i = 0; i < match.length; i++) {
+            var line = match[i];
+            if (!line) {
+                throw new Error("line is empty!");
+            }
+            if (line.startDelta.row === line.endDelta.row) {
+                var row = line.startDelta.row;
+                for (var col = line.startDelta.col; col <= line.endDelta.col; col++) {
+                    for (var i_1 = row; i_1 >= 0; i_1--) {
+                        if (!visited[i_1][col]) {
+                            visited[i_1][col] = true;
+                            changedDelta.push({ row: i_1, col: col });
+                        }
+                    }
+                }
+            }
+            else if (line.startDelta.col === line.endDelta.col) {
+                var col = line.startDelta.col;
+                for (var row = Math.max(line.startDelta.row, line.endDelta.row); row >= 0; row--) {
+                    if (!visited[row][col]) {
+                        visited[row][col] = true;
+                        changedDelta.push({ row: row, col: col });
+                    }
+                }
+            }
+            else {
+                throw new Error("Error in getting match, should have same col or row!");
+            }
+        }
+        return changedDelta;
+    }
     /**
      * Find match of 3 and over 3, update board
      * @ board board before update
      * @ return board after update
      **/
     function updateBoard(board, fromDelta, toDelta) {
-        //let board: Board = stateBeforeMove.board;
         var boardTemp = angular.copy(board);
         var match = getMatch(boardTemp, fromDelta, toDelta);
         if (!match || match.length === 0) {
             throw new Error("Can only make a move for pet matches of 3 or over 3!");
         }
-        //window.alert(match.length);
+        var changedDelta = getChangedDelta(match);
         var count = 0;
         //mark elements to be removed
         var visited = [];
@@ -447,22 +485,12 @@ var gameLogic;
             }
         }
         return {
+            changedDelta: changedDelta,
             board: newBoard,
             count: count
         };
     }
     gameLogic.updateBoard = updateBoard;
-    function getChangedDelta(board1, board2) {
-        var changedDelta = [];
-        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
-            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
-                if (!angular.equals(board1[i][j], board2[i][j])) {
-                    changedDelta.push({ row: i, col: j });
-                }
-            }
-        }
-        return changedDelta;
-    }
     /**
      * @ params stateAfterMove state before make move
      * @ return state after make move
@@ -477,10 +505,9 @@ var gameLogic;
         board[toDelta.row][toDelta.col] = tmpStr;
         //remove match >= 3, update score and board 
         var stateAfterMove = angular.copy(stateBeforeMove);
-        stateAfterMove.changedDelta = getChangedDelta(boardCount.board, stateBeforeMove.board);
+        stateAfterMove.changedDelta = boardCount.changedDelta;
         stateAfterMove.board = boardCount.board;
         stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
-        stateAfterMove.boardCount = boardCount;
         stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
         return stateAfterMove;
     }

@@ -203,7 +203,7 @@ var game;
                 }
             }
         }
-        log.info("test it out", row, col, res, game.state.changedDelta);
+        // log.info("test it out", row, col, res, state.changedDelta);
         if (res !== 0 && game.state.changedDelta)
             return 'movedown' + res; //return how many steps you need to move down
         return ''; //you don't need to move'
