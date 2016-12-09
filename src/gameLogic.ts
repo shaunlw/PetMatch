@@ -259,7 +259,7 @@ module gameLogic {
       match[i++] = lDelta;
     }
 
-    //check check alignment for pet currently in toIndex
+    //check alignment for pet currently in toIndex
     target = board[toDelta.row][toDelta.col];
     count = 1;
     col = toDelta.col;
@@ -455,6 +455,11 @@ export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : Boa
   }
   let changedDelta : BoardDelta[] = getChangedDelta(match);
   
+  //swap on temp board
+  let petFrom : string = board[fromDelta.row][fromDelta.col];
+  board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
+  board[toDelta.row][toDelta.col] = petFrom;
+
   let count : number = 0;
   //mark elements to be removed
   let visited : boolean[][] = [];
@@ -551,10 +556,6 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     if (!stateBeforeMove) {
       stateBeforeMove = getInitialState();
     }
-    //let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
-    //let toDelta : BoardDelta = stateBeforeMove.toDelta;
-    
-    //let scores : number[] = stateBeforeMove.scores;
     if ( isTie(stateBeforeMove) || getWinner(stateBeforeMove) !== '') {
       throw new Error("Can only make a move if the game is not over!");
     }
@@ -565,7 +566,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
       throw new Error("Can only swap adjacent pets!");
     } 
     stateBeforeMove.fromDelta = fromDelta;
-    stateBeforeMove.toDelta = fromDelta;
+    stateBeforeMove.toDelta = toDelta;
     let changedBoardCount : changedDeltaAndBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);

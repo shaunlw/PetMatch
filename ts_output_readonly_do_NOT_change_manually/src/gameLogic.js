@@ -226,7 +226,7 @@ var gameLogic;
             };
             match[i++] = lDelta;
         }
-        //check check alignment for pet currently in toIndex
+        //check alignment for pet currently in toIndex
         target = board[toDelta.row][toDelta.col];
         count = 1;
         col = toDelta.col;
@@ -423,6 +423,10 @@ var gameLogic;
             throw new Error("Can only make a move for pet matches of 3 or over 3!");
         }
         var changedDelta = getChangedDelta(match);
+        //swap on temp board
+        var petFrom = board[fromDelta.row][fromDelta.col];
+        board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
+        board[toDelta.row][toDelta.col] = petFrom;
         var count = 0;
         //mark elements to be removed
         var visited = [];
@@ -519,9 +523,6 @@ var gameLogic;
         if (!stateBeforeMove) {
             stateBeforeMove = getInitialState();
         }
-        //let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
-        //let toDelta : BoardDelta = stateBeforeMove.toDelta;
-        //let scores : number[] = stateBeforeMove.scores;
         if (isTie(stateBeforeMove) || getWinner(stateBeforeMove) !== '') {
             throw new Error("Can only make a move if the game is not over!");
         }
@@ -532,7 +533,7 @@ var gameLogic;
             throw new Error("Can only swap adjacent pets!");
         }
         stateBeforeMove.fromDelta = fromDelta;
-        stateBeforeMove.toDelta = fromDelta;
+        stateBeforeMove.toDelta = toDelta;
         var changedBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
         //get state after movement 
         var stateAfterMove = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
