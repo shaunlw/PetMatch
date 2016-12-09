@@ -24,19 +24,10 @@ var gameLogic;
            ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
            ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
          ];     */
-        var board = [];
-        //let board :Board = getRandomBoard();
-        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
-            board[i] = [];
-            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
-                board[i][j] = getRandomPet();
-            }
+        var board = getRandomBoard();
+        while (shouldShuffle(board)) {
+            board = shuffle();
         }
-        //some errors need to be corrected for shouldshuffle
-        /*
-        while (shouldShuffle) {
-          board = getRandomBoard();
-        } */
         return board;
     }
     gameLogic.getInitialBoard = getInitialBoard;
@@ -294,8 +285,8 @@ var gameLogic;
     gameLogic.getMatch = getMatch;
     function shouldShuffle(board) {
         var petsToSwitch = getPossibleMove(board);
-        if (petsToSwitch.fromDelta.row === petsToSwitch.toDelta.row
-            && petsToSwitch.fromDelta.col === petsToSwitch.toDelta.col) {
+        if (!petsToSwitch.fromDelta.row && !petsToSwitch.toDelta.row
+            && !petsToSwitch.fromDelta.col && !petsToSwitch.toDelta.col) {
             return true;
         }
         return false;
@@ -330,7 +321,8 @@ var gameLogic;
             for (var j = 1; j < gameLogic.PARAMS.COLS; j++) {
                 deltaF.col = j;
                 deltaT.col = j - 1;
-                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                var boardTemp1 = angular.copy(board);
+                var tpMatch = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
@@ -346,7 +338,8 @@ var gameLogic;
             for (var j = 1; j < gameLogic.PARAMS.ROWS; j++) {
                 deltaF.row = j;
                 deltaT.row = j - 1;
-                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                var boardTemp2 = angular.copy(board);
+                var tpMatch = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
@@ -367,7 +360,7 @@ var gameLogic;
         var count = 0;
         for (var i = 0; i < match.length; i++) {
             var matchI = match[i];
-            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + Math.abs(matchI.endDelta.col - matchI.startDelta.col);
         }
         return count;
     }
@@ -578,6 +571,8 @@ var gameLogic;
     }
     gameLogic.checkMoveOkN = checkMoveOkN;
     function forSimpleTestHtml() {
+        var board = getRandomBoard();
+        return getPossibleMove(board);
     }
     gameLogic.forSimpleTestHtml = forSimpleTestHtml;
 })(gameLogic || (gameLogic = {}));
