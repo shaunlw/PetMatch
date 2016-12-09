@@ -57,19 +57,10 @@ module gameLogic {
       ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
     ];     */
     
-    let board : Board = [];
-    //let board :Board = getRandomBoard();
-    for (let i = 0; i < PARAMS.ROWS; i++) {
-      board[i] = [];
-      for (let j = 0; j < PARAMS.COLS; j++) {
-        board[i][j] = getRandomPet();
-      }  
-    }
-    //some errors need to be corrected for shouldshuffle
-    /*
-    while (shouldShuffle) {
-      board = getRandomBoard();
-    } */
+    let board :Board = getRandomBoard();
+    while (shouldShuffle(board)) {
+      board = shuffle();
+    } 
     return board;
   }
 
@@ -183,10 +174,8 @@ module gameLogic {
    * @ Return info of all matched pets with pet in fromDelta or toDelta.
    **/
    export function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
-    
     let match : lineDelta[] = [];
     let i : number = 0;
-   
     //swap on temp board
     let petFrom : string = board[fromDelta.row][fromDelta.col];
     board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
@@ -325,8 +314,8 @@ module gameLogic {
 
 export function shouldShuffle(board : Board) : boolean {
   let petsToSwitch : petSwitch = getPossibleMove(board);
-  if (petsToSwitch.fromDelta.row ===  petsToSwitch.toDelta.row 
-        && petsToSwitch.fromDelta.col ===  petsToSwitch.toDelta.col) {
+  if (!petsToSwitch.fromDelta.row && !petsToSwitch.toDelta.row 
+        && !petsToSwitch.fromDelta.col && !petsToSwitch.toDelta.col) {
           return true;
   }
   return false;
@@ -362,13 +351,15 @@ export function getPossibleMove(board : Board) : petSwitch{
             for (let j = 1; j < gameLogic.PARAMS.COLS; j++) {
                 deltaF.col = j;
                 deltaT.col = j - 1;
-                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                let boardTemp1 = angular.copy(board);
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
+                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -378,13 +369,15 @@ export function getPossibleMove(board : Board) : petSwitch{
             for (let j = 1; j < gameLogic.PARAMS.ROWS; j++) {
                 deltaF.row = j;
                 deltaT.row = j - 1;
-                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                let boardTemp2 = angular.copy(board);
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
+                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -399,7 +392,7 @@ export function getPossibleMove(board : Board) : petSwitch{
         let count : number = 0;
         for (let i = 0; i < match.length; i++) {
             let matchI : lineDelta = match[i];
-            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row )+ Math.abs(matchI.endDelta.col - matchI.startDelta.col);
         }
         return count;
     }
@@ -615,5 +608,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
 
 
   export function forSimpleTestHtml() {
+    let board : Board = getRandomBoard();
+    return getPossibleMove(board);
   }
 }
