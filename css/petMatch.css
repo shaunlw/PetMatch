@@ -11,6 +11,16 @@ body {
   background-color: rgb(255,255,255);
 }
 
+
+@keyframes Fade {
+  from {opacity: 1;  transform: translateY(0)}
+  to {opacity: 0.1;  transform: translateY(-25%)}
+}
+.scoreNotice {
+  animation: Fade 1s ease-out;
+  transform: translate3d(0,0,0);
+}
+
 /*.img_container {
   position:relative; 
   top:0; 
@@ -92,6 +102,20 @@ body {
 
 .movedown8 {  
   animation: movedown8 2s ease-in-out;
+}
+
+.center {
+  font-family: sans-serif;
+  position: absolute;
+  left: 40%;
+  top: 10px;
+  background: #FAF0E6;
+  height: 40px;
+  width: 250px;
+}
+
+body {
+  background: #FAF0E6
 }
 
 

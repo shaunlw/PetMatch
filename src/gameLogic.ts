@@ -26,6 +26,7 @@ interface IState {
   toDelta : BoardDelta;
   //score for players of corresponding index 
   scores : number[];
+  lastStepScores: number[];
   completedSteps : number[];
   changedDelta : BoardDelta[];
 }
@@ -38,6 +39,15 @@ module gameLogic {
   };
   const NUM_PLAYERS = 2;
   const NUM_TYPES = 4;
+
+  // export let stateTransition: IStateTransition = null; 
+
+  // export function getTurnIndexBfMv(): number {
+  //   if (!stateTransition.turnIndexBeforeMove) return 0;
+  //   else
+  //     return stateTransition.turnIndexBeforeMove;
+     
+  // }
 
   /**
    * @ Return the initial PetMatch board.
@@ -56,11 +66,28 @@ module gameLogic {
       ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
       ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
     ];     */
+<<<<<<< HEAD
     
     let board :Board = getRandomBoard();
     while (shouldShuffle(board)) {
       board = shuffle();
     } 
+=======
+
+    let board : Board = [];
+    //let board :Board = getRandomBoard();
+    for (let i = 0; i < PARAMS.ROWS; i++) {
+      board[i] = [];
+      for (let j = 0; j < PARAMS.COLS; j++) {
+        board[i][j] = getRandomPet();
+      }  
+    }
+    //some errors need to be corrected for shouldshuffle
+    /*
+    while (shouldShuffle) {
+      board = getRandomBoard();
+    } */
+>>>>>>> ff0be578b4ef63957700c52667df55fb90caff2e
     return board;
   }
 
@@ -92,14 +119,17 @@ module gameLogic {
 
   export function getInitialState() : IState {
     let scores : number[] = [];
+    let lastStepScores : number[] = [];
     for (let i = 0; i < NUM_PLAYERS; i++) {
       scores[i] = 0;
+      lastStepScores[i] = 0;
     }
     return {
       board : getInitialBoard(), 
       fromDelta : null,
       toDelta : null,
       scores : scores,
+      lastStepScores : lastStepScores,
       completedSteps : [0,0],
       changedDelta : null
     };
@@ -536,6 +566,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   stateAfterMove.changedDelta = boardCount.changedDelta;
   stateAfterMove.board = boardCount.board;
   stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
+  stateAfterMove.lastStepScores[turnIndexBeforeMove] = boardCount.count * 10;
   stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
   return stateAfterMove;
 }
@@ -563,6 +594,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     let changedBoardCount : changedDeltaAndBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
+    
     stateAfterMove.fromDelta = fromDelta;
     stateAfterMove.toDelta = toDelta;
     let winner = getWinner(stateAfterMove);
@@ -584,7 +616,8 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
    export function checkMoveOk(stateTransition: IStateTransition): void {
     // We can assume that turnIndexBeforeMove and stateBeforeMove are legal, and we need
     // to verify that the move is OK.
-    let turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
+    let turnIndexBeforeMove: number;
+    turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
     let stateBeforeMove: IState = stateTransition.stateBeforeMove;
     let move: IMove = stateTransition.move;
     

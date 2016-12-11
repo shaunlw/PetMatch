@@ -10,6 +10,27 @@ var game;
     game.board = null;
     game.dragAndDropStartPos = null;
     game.dragAndDropElement = null;
+    function getScores() {
+        return game.state.scores;
+    }
+    game.getScores = getScores;
+    function getTotSteps() {
+        return PARAMS.TOTALSTEPS;
+    }
+    game.getTotSteps = getTotSteps;
+    // export function getStepScore(): number {//return the single score obtained by previous move
+    //     return state.lastStepScores[gameLogic.getTurnIndexBfMv()];
+    // }
+    // export function getIndexBfMv(): number {
+    //     return gameLogic.getTurnIndexBfMv()
+    // }
+    // export function shouldShowScore(): boolean {//determine if score animation should be shown in html
+    //     return !(getStepScore() == 0);
+    // }
+    function getCompletedSteps() {
+        return game.state.completedSteps;
+    }
+    game.getCompletedSteps = getCompletedSteps;
     function getTranslations() {
         return {};
     }
