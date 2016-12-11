@@ -7,12 +7,6 @@ var gameLogic;
     };
     var NUM_PLAYERS = 2;
     var NUM_TYPES = 4;
-    // export let stateTransition: IStateTransition = null; 
-    // export function getTurnIndexBfMv(): number {
-    //   if (!stateTransition.turnIndexBeforeMove) return 0;
-    //   else
-    //     return stateTransition.turnIndexBeforeMove;
-    // }
     /**
      * @ Return the initial PetMatch board.
      *   a ROWSxCOLS matrix containing four types of pets.
@@ -66,17 +60,14 @@ var gameLogic;
     }
     function getInitialState() {
         var scores = [];
-        var lastStepScores = [];
         for (var i = 0; i < NUM_PLAYERS; i++) {
             scores[i] = 0;
-            lastStepScores[i] = 0;
         }
         return {
             board: getInitialBoard(),
             fromDelta: null,
             toDelta: null,
             scores: scores,
-            lastStepScores: lastStepScores,
             completedSteps: [0, 0],
             changedDelta: null
         };
@@ -514,7 +505,6 @@ var gameLogic;
         stateAfterMove.changedDelta = boardCount.changedDelta;
         stateAfterMove.board = boardCount.board;
         stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
-        stateAfterMove.lastStepScores[turnIndexBeforeMove] = boardCount.count * 10;
         stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
         return stateAfterMove;
     }
@@ -561,8 +551,7 @@ var gameLogic;
     function checkMoveOk(stateTransition) {
         // We can assume that turnIndexBeforeMove and stateBeforeMove are legal, and we need
         // to verify that the move is OK.
-        var turnIndexBeforeMove;
-        turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
+        var turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
         var stateBeforeMove = stateTransition.stateBeforeMove;
         var move = stateTransition.move;
         if (!stateBeforeMove && turnIndexBeforeMove === 0 &&
