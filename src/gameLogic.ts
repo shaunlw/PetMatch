@@ -555,7 +555,7 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     if (!fromDelta || !toDelta) {
       throw new Error("Cannot have empty delta value!");
     }
-    if (angular.equals(fromDelta, toDelta)) {
+    if (Math.abs(fromDelta.row - toDelta.row) + Math.abs(fromDelta.col - toDelta.col) != 1) {
       throw new Error("Can only swap adjacent pets!");
     } 
     stateBeforeMove.fromDelta = fromDelta;
@@ -597,15 +597,13 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     let expectedMove = createMove(stateBeforeMove , fromDelta, toDelta, turnIndexBeforeMove);
     
     if (!angular.equals(move, expectedMove)) {
-      throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
-          ", but got stateTransition=" + angular.toJson(stateTransition, true))
+      throw new Error("Expected move =" + angular.toJson(expectedMove, true) +
+          ", but got stateTransition =" + angular.toJson(stateTransition, true))
     } 
   } 
 
    export function checkMoveOkN(stateTransition: IStateTransition): void {
-
    }
-
 
   export function forSimpleTestHtml() {
     let board : Board = getRandomBoard();
