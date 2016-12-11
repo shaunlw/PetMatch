@@ -30,6 +30,29 @@ module game {
     export let dragAndDropStartPos: BoardDelta = null;
     export let dragAndDropElement: HTMLElement = null;
     
+    
+    export function getScores(): number[]{//return accumulated scores of each player
+        return state.scores;
+    }
+    export function getTotSteps(): number {//return max steps allowed
+        return PARAMS.TOTALSTEPS;
+    } 
+
+    // export function getStepScore(): number {//return the single score obtained by previous move
+    //     return state.lastStepScores[gameLogic.getTurnIndexBfMv()];
+    // }
+    // export function getIndexBfMv(): number {
+    //     return gameLogic.getTurnIndexBfMv()
+    // }
+
+    // export function shouldShowScore(): boolean {//determine if score animation should be shown in html
+    //     return !(getStepScore() == 0);
+    // }
+
+    export function getCompletedSteps (): any {//return steps been completed
+        return state.completedSteps;
+    }
+    
     function getTranslations(): Translations {
         return {};
     }
