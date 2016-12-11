@@ -425,13 +425,10 @@ var gameLogic;
             throw new Error("Can only make a move for pet matches of 3 or over 3!");
         }
         var changedDelta = getChangedDelta(match);
-<<<<<<< HEAD
         //swap on temp board
         var petFrom = board[fromDelta.row][fromDelta.col];
         board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
         board[toDelta.row][toDelta.col] = petFrom;
-=======
->>>>>>> ff0be578b4ef63957700c52667df55fb90caff2e
         var count = 0;
         //mark elements to be removed
         var visited = [];
@@ -517,10 +514,7 @@ var gameLogic;
         stateAfterMove.changedDelta = boardCount.changedDelta;
         stateAfterMove.board = boardCount.board;
         stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
-<<<<<<< HEAD
-=======
         stateAfterMove.lastStepScores[turnIndexBeforeMove] = boardCount.count * 10;
->>>>>>> ff0be578b4ef63957700c52667df55fb90caff2e
         stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
         return stateAfterMove;
     }
@@ -538,7 +532,7 @@ var gameLogic;
         if (!fromDelta || !toDelta) {
             throw new Error("Cannot have empty delta value!");
         }
-        if (angular.equals(fromDelta, toDelta)) {
+        if (Math.abs(fromDelta.row - toDelta.row) + Math.abs(fromDelta.col - toDelta.col) != 1) {
             throw new Error("Can only swap adjacent pets!");
         }
         stateBeforeMove.fromDelta = fromDelta;
@@ -579,8 +573,8 @@ var gameLogic;
         var toDelta = stateTransition.move.stateAfterMove.toDelta;
         var expectedMove = createMove(stateBeforeMove, fromDelta, toDelta, turnIndexBeforeMove);
         if (!angular.equals(move, expectedMove)) {
-            throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
-                ", but got stateTransition=" + angular.toJson(stateTransition, true));
+            throw new Error("Expected move =" + angular.toJson(expectedMove, true) +
+                ", but got stateTransition =" + angular.toJson(stateTransition, true));
         }
     }
     gameLogic.checkMoveOk = checkMoveOk;
