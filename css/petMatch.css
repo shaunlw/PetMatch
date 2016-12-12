@@ -107,11 +107,14 @@ body {
 .center {
   font-family: sans-serif;
   position: absolute;
-  left: 40%;
-  top: 10px;
+  top: 5%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -120px;
+
   background: #FAF0E6;
   height: 40px;
-  width: 250px;
+  width: 240px;
 }
 
 body {
