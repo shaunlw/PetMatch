@@ -150,7 +150,7 @@ module game {
             dragAndDropStart = dragAndDropPos;
             dragAndDropElement = document.getElementById("img_container_" + dragAndDropStartPos.row + "_" + dragAndDropStartPos.col);
             let style: any = dragAndDropElement.style;
-            style['z-index'] = 200;
+            style['z-index'] = 100;
             setDragAndDropElementPos(dragAndDropPos, cellSize);
             return;
         }
@@ -204,7 +204,7 @@ module game {
     style['transform'] = transform;
     style['-webkit-transform'] = transform;
     style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
-  }
+}
 
  /**
   * Get the position of the cell.

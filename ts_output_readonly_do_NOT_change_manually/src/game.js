@@ -130,7 +130,7 @@ var game;
             dragAndDropStart = dragAndDropPos;
             game.dragAndDropElement = document.getElementById("img_container_" + game.dragAndDropStartPos.row + "_" + game.dragAndDropStartPos.col);
             var style = game.dragAndDropElement.style;
-            style['z-index'] = 200;
+            style['z-index'] = 100;
             setDragAndDropElementPos(dragAndDropPos, cellSize);
             return;
         }
