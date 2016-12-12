@@ -3,46 +3,20 @@ var gameLogic;
     gameLogic.PARAMS = {
         ROWS: 9,
         COLS: 9,
-        TOTALSTEPS: 15
+        TOTALSTEPS: 30
     };
     var NUM_PLAYERS = 2;
     var NUM_TYPES = 4;
-    // export let stateTransition: IStateTransition = null; 
-    // export function getTurnIndexBfMv(): number {
-    //   if (!stateTransition.turnIndexBeforeMove) return 0;
-    //   else
-    //     return stateTransition.turnIndexBeforeMove;
-    // }
+    var testMode = false;
     /**
      * @ Return the initial PetMatch board.
      *   a ROWSxCOLS matrix containing four types of pets.
      **/
     function getInitialBoard() {
-        /*
-         let board : Board = [
-           ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
-           ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
-           ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
-           ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
-           ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
-           ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
-           ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
-           ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
-           ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-         ];     */
-        var board = [];
-        //let board :Board = getRandomBoard();
-        for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
-            board[i] = [];
-            for (var j = 0; j < gameLogic.PARAMS.COLS; j++) {
-                board[i][j] = getRandomPet();
-            }
+        var board = getRandomBoard();
+        while (shouldShuffle(board)) {
+            board = shuffle();
         }
-        //some errors need to be corrected for shouldshuffle
-        /*
-        while (shouldShuffle) {
-          board = getRandomBoard();
-        } */
         return board;
     }
     gameLogic.getInitialBoard = getInitialBoard;
@@ -57,6 +31,9 @@ var gameLogic;
         return board;
     }
     function getRandomPet() {
+        if (testMode) {
+            return "A";
+        }
         var ans = "";
         var randPet = Math.floor(Math.random() * NUM_TYPES + 1);
         if (randPet === 1) {
@@ -73,19 +50,20 @@ var gameLogic;
         }
         return ans;
     }
+    function setTestMode(mode) {
+        testMode = mode;
+    }
+    gameLogic.setTestMode = setTestMode;
     function getInitialState() {
         var scores = [];
-        var lastStepScores = [];
         for (var i = 0; i < NUM_PLAYERS; i++) {
             scores[i] = 0;
-            lastStepScores[i] = 0;
         }
         return {
             board: getInitialBoard(),
             fromDelta: null,
             toDelta: null,
             scores: scores,
-            lastStepScores: lastStepScores,
             completedSteps: [0, 0],
             changedDelta: null
         };
@@ -235,7 +213,7 @@ var gameLogic;
             };
             match[i++] = lDelta;
         }
-        //check check alignment for pet currently in toIndex
+        //check alignment for pet currently in toIndex
         target = board[toDelta.row][toDelta.col];
         count = 1;
         col = toDelta.col;
@@ -303,8 +281,8 @@ var gameLogic;
     gameLogic.getMatch = getMatch;
     function shouldShuffle(board) {
         var petsToSwitch = getPossibleMove(board);
-        if (petsToSwitch.fromDelta.row === petsToSwitch.toDelta.row
-            && petsToSwitch.fromDelta.col === petsToSwitch.toDelta.col) {
+        if (!petsToSwitch.fromDelta.row && !petsToSwitch.toDelta.row
+            && !petsToSwitch.fromDelta.col && !petsToSwitch.toDelta.col) {
             return true;
         }
         return false;
@@ -339,7 +317,8 @@ var gameLogic;
             for (var j = 1; j < gameLogic.PARAMS.COLS; j++) {
                 deltaF.col = j;
                 deltaT.col = j - 1;
-                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                var boardTemp1 = angular.copy(board);
+                var tpMatch = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
@@ -355,7 +334,8 @@ var gameLogic;
             for (var j = 1; j < gameLogic.PARAMS.ROWS; j++) {
                 deltaF.row = j;
                 deltaT.row = j - 1;
-                var tpMatch = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                var boardTemp2 = angular.copy(board);
+                var tpMatch = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
@@ -376,7 +356,7 @@ var gameLogic;
         var count = 0;
         for (var i = 0; i < match.length; i++) {
             var matchI = match[i];
-            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + Math.abs(matchI.endDelta.col - matchI.startDelta.col);
         }
         return count;
     }
@@ -432,6 +412,10 @@ var gameLogic;
             throw new Error("Can only make a move for pet matches of 3 or over 3!");
         }
         var changedDelta = getChangedDelta(match);
+        //swap on temp board
+        var petFrom = board[fromDelta.row][fromDelta.col];
+        board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
+        board[toDelta.row][toDelta.col] = petFrom;
         var count = 0;
         //mark elements to be removed
         var visited = [];
@@ -517,7 +501,6 @@ var gameLogic;
         stateAfterMove.changedDelta = boardCount.changedDelta;
         stateAfterMove.board = boardCount.board;
         stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
-        stateAfterMove.lastStepScores[turnIndexBeforeMove] = boardCount.count * 10;
         stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
         return stateAfterMove;
     }
@@ -529,20 +512,17 @@ var gameLogic;
         if (!stateBeforeMove) {
             stateBeforeMove = getInitialState();
         }
-        //let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
-        //let toDelta : BoardDelta = stateBeforeMove.toDelta;
-        //let scores : number[] = stateBeforeMove.scores;
         if (isTie(stateBeforeMove) || getWinner(stateBeforeMove) !== '') {
             throw new Error("Can only make a move if the game is not over!");
         }
         if (!fromDelta || !toDelta) {
             throw new Error("Cannot have empty delta value!");
         }
-        if (angular.equals(fromDelta, toDelta)) {
+        if (Math.abs(fromDelta.row - toDelta.row) + Math.abs(fromDelta.col - toDelta.col) != 1) {
             throw new Error("Can only swap adjacent pets!");
         }
         stateBeforeMove.fromDelta = fromDelta;
-        stateBeforeMove.toDelta = fromDelta;
+        stateBeforeMove.toDelta = toDelta;
         var changedBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
         //get state after movement 
         var stateAfterMove = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
@@ -567,8 +547,7 @@ var gameLogic;
     function checkMoveOk(stateTransition) {
         // We can assume that turnIndexBeforeMove and stateBeforeMove are legal, and we need
         // to verify that the move is OK.
-        var turnIndexBeforeMove;
-        turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
+        var turnIndexBeforeMove = stateTransition.turnIndexBeforeMove;
         var stateBeforeMove = stateTransition.stateBeforeMove;
         var move = stateTransition.move;
         if (!stateBeforeMove && turnIndexBeforeMove === 0 &&
@@ -579,8 +558,8 @@ var gameLogic;
         var toDelta = stateTransition.move.stateAfterMove.toDelta;
         var expectedMove = createMove(stateBeforeMove, fromDelta, toDelta, turnIndexBeforeMove);
         if (!angular.equals(move, expectedMove)) {
-            throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
-                ", but got stateTransition=" + angular.toJson(stateTransition, true));
+            throw new Error("Expected move =" + angular.toJson(expectedMove, true) +
+                ", but got stateTransition =" + angular.toJson(stateTransition, true));
         }
     }
     gameLogic.checkMoveOk = checkMoveOk;
@@ -588,6 +567,8 @@ var gameLogic;
     }
     gameLogic.checkMoveOkN = checkMoveOkN;
     function forSimpleTestHtml() {
+        var board = getRandomBoard();
+        return getPossibleMove(board);
     }
     gameLogic.forSimpleTestHtml = forSimpleTestHtml;
 })(gameLogic || (gameLogic = {}));
