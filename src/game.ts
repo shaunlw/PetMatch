@@ -21,33 +21,64 @@ module game {
     let PARAMS : any = gameLogic.PARAMS;
     export let currentUpdateUI: IUpdateUI = null;
     export let didMakeMove: boolean = false; // You can only make one move per updateUI
+    export let animationEnded = false;
     export let animationEndedTimeout: ng.IPromise<any> = null;
     export let state: IState = null;
     export let board: Board = null;
     export let dragAndDropStartPos: BoardDelta = null;
     export let dragAndDropElement: HTMLElement = null;
-    
-    
-    export function getScores(): number[]{//return accumulated scores of each player
-        return state.scores;
+
+  export function getCurScore(){
+    let afterscoresum = 0;
+    let beforePlayer0 = 0;
+    let beforePlayer1 = 0;
+    let afterPlayer0 = 0;
+    let afterPlayer1 = 0;
+    if (currentUpdateUI.move.stateAfterMove){
+      afterPlayer0 = currentUpdateUI.move.stateAfterMove.scores[0];
+      afterPlayer1 = currentUpdateUI.move.stateAfterMove.scores[1];
+      afterscoresum = afterPlayer0 + afterPlayer1;
     }
+    let beforescoresum = 0;
+    if (currentUpdateUI.stateBeforeMove){
+      beforePlayer0 = currentUpdateUI.stateBeforeMove.scores[0];
+      beforePlayer1 = currentUpdateUI.stateBeforeMove.scores[1];
+      beforescoresum = beforePlayer0 + beforePlayer1;
+    }
+    let b = false;
+    if (afterPlayer0 - beforePlayer0 > 0){
+      b = currentUpdateUI.yourPlayerIndex === 0;
+      log.info("scoreby0", currentUpdateUI.yourPlayerIndex);
+    }
+    else if (afterPlayer1 - beforePlayer1 > 0){
+      b = currentUpdateUI.yourPlayerIndex === 1;
+      log.info("scoreby1", currentUpdateUI.yourPlayerIndex);
+    }
+    return afterscoresum-beforescoresum;
+  }
+
+    export function getMyScore(): any{//return accumulated scores
+        return state.scores[currentUpdateUI.move.turnIndexAfterMove];
+    }
+
+    export function shouldShowScore() {
+        return !animationEnded && getMyScore() !== 0;
+    }
+    
+    export function getOpponentScore(): any{//return accumulated scores
+        return state.scores[1 - currentUpdateUI.move.turnIndexAfterMove];
+    }
+
     export function getTotSteps(): number {//return max steps allowed
         return PARAMS.TOTALSTEPS;
     } 
 
-    // export function getStepScore(): number {//return the single score obtained by previous move
-    //     return state.lastStepScores[gameLogic.getTurnIndexBfMv()];
-    // }
-    // export function getIndexBfMv(): number {
-    //     return gameLogic.getTurnIndexBfMv()
-    // }
+    export function getMyCompletedSteps (): any {//return steps been completed
+        return state.completedSteps[currentUpdateUI.move.turnIndexAfterMove];
+    }
 
-    // export function shouldShowScore(): boolean {//determine if score animation should be shown in html
-    //     return !(getStepScore() == 0);
-    // }
-
-    export function getCompletedSteps (): any {//return steps been completed
-        return state.completedSteps;
+    export function getOpponentCompletedSteps (): any {//return steps been completed
+        return state.completedSteps[1 - currentUpdateUI.move.turnIndexAfterMove];
     }
     
     function getTranslations(): Translations {
@@ -119,7 +150,7 @@ module game {
             dragAndDropStart = dragAndDropPos;
             dragAndDropElement = document.getElementById("img_container_" + dragAndDropStartPos.row + "_" + dragAndDropStartPos.col);
             let style: any = dragAndDropElement.style;
-            style['z-index'] = 20;
+            style['z-index'] = 200;
             setDragAndDropElementPos(dragAndDropPos, cellSize);
             return;
         }
@@ -188,6 +219,7 @@ module game {
   function animationEndedCallback() {
     log.info("Animation ended");
     maybeSendComputerMove();
+    animationEnded = true;
   }
   function clearAnimationTimeout() {
     if (animationEndedTimeout) {
@@ -198,6 +230,7 @@ module game {
 
     export function updateUI(params: IUpdateUI): void {
     log.info("Game got updateUI :", params);
+    animationEnded = false;
     didMakeMove = false; // Only one move per updateUI
     currentUpdateUI = params;
     clearAnimationTimeout();
@@ -298,10 +331,10 @@ module game {
         return isMyTurn() && !isComputer();
     }
 
-    function isMyTurn() {
-        return !didMakeMove && // you can only make one move per updateUI.
-        currentUpdateUI.move.turnIndexAfterMove >= 0 && // game is ongoing
-        currentUpdateUI.yourPlayerIndex === currentUpdateUI.move.turnIndexAfterMove; // it's my turn
+  export function isMyTurn() {
+    return !didMakeMove && // you can only make one move per updateUI.
+      currentUpdateUI.move.turnIndexAfterMove >= 0 && // game is ongoing
+      currentUpdateUI.yourPlayerIndex === currentUpdateUI.move.turnIndexAfterMove; // it's my turn
     }
 
     export function isPieceA(row: number, col: number): boolean {

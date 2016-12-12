@@ -55,15 +55,15 @@ var gameLogic;
     }
     gameLogic.setTestMode = setTestMode;
     function getInitialState() {
-        var scores = [];
-        for (var i = 0; i < NUM_PLAYERS; i++) {
-            scores[i] = 0;
-        }
+        // let scores : number[] = [];
+        // for (let i = 0; i < NUM_PLAYERS; i++) {
+        //   scores[i] = 0;
+        // }
         return {
             board: getInitialBoard(),
             fromDelta: null,
             toDelta: null,
-            scores: scores,
+            scores: [0, 0],
             completedSteps: [0, 0],
             changedDelta: null
         };

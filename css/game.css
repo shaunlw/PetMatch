@@ -16,9 +16,11 @@ body {
   from {opacity: 1;  transform: translateY(0)}
   to {opacity: 0.1;  transform: translateY(-25%)}
 }
+
 .scoreNotice {
   animation: Fade 1s ease-out;
   transform: translate3d(0,0,0);
+  color: red;
 }
 
 /*.img_container {
