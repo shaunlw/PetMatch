@@ -10,6 +10,27 @@ var game;
     game.board = null;
     game.dragAndDropStartPos = null;
     game.dragAndDropElement = null;
+    function getScores() {
+        return game.state.scores;
+    }
+    game.getScores = getScores;
+    function getTotSteps() {
+        return PARAMS.TOTALSTEPS;
+    }
+    game.getTotSteps = getTotSteps;
+    // export function getStepScore(): number {//return the single score obtained by previous move
+    //     return state.lastStepScores[gameLogic.getTurnIndexBfMv()];
+    // }
+    // export function getIndexBfMv(): number {
+    //     return gameLogic.getTurnIndexBfMv()
+    // }
+    // export function shouldShowScore(): boolean {//determine if score animation should be shown in html
+    //     return !(getStepScore() == 0);
+    // }
+    function getCompletedSteps() {
+        return game.state.completedSteps;
+    }
+    game.getCompletedSteps = getCompletedSteps;
     function getTranslations() {
         return {};
     }
@@ -20,7 +41,8 @@ var game;
             throw new Error("Can't find gameArea!");
         translate.setTranslations(getTranslations());
         translate.setLanguage('en');
-        resizeGameAreaService.setWidthToHeight(1);
+        log.log("Translation of 'RULES_OF_PETMATCH' is " + translate('RULES_OF_PETMATCH'));
+        resizeGameAreaService.setWidthToHeight(0.777);
         moveService.setGame({
             minNumberOfPlayers: 2,
             maxNumberOfPlayers: 2,
@@ -29,8 +51,20 @@ var game;
             gotMessageFromPlatform: null,
         });
         dragAndDropService.addDragListener("gameArea", handleDragEvent); //'gameArea' here refers to the reference variable not the string literal representing the element id.
+    } //addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
+    game.init = init;
+    function getTranslation() {
+        return {
+            RULES_OF_PETMATCH: {
+                en: "Rules of PetMatch",
+                zh: "宠物对对碰游戏规则",
+            },
+            PET_MATCH_RULES_SLIDE1: {
+                en: "You and your opponent take turns to swap adjacent animals. If you have 3 or over 3 matches over a line, you get score increased according to the number of matches.",
+                zh: "你和你的对手轮流进行操作。你需要拖换相邻的宠物。如果拖换之后你得到了三个或者三个以上一样的宠物相连成一条线，连成一条线的宠物数目有多少，你的分数就对应增长多少。",
+            }
+        };
     }
-    game.init = init; //addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
     function handleDragEvent(type, cx, cy) {
         log.log("type", type);
         log.log("cx " + cx);
@@ -93,8 +127,8 @@ var game;
         if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
             endDragAndDrop();
         }
-    }
-    game.handleDragEvent = handleDragEvent; //end handleDragEvent()
+    } //end handleDragEvent()
+    game.handleDragEvent = handleDragEvent;
     function getCellSize() {
         return {
             width: gameArea.clientWidth / PARAMS.COLS,
@@ -203,7 +237,7 @@ var game;
                 }
             }
         }
-        log.info("test it out", row, col, res, game.state.changedDelta);
+        // log.info("test it out", row, col, res, state.changedDelta);
         if (res !== 0 && game.state.changedDelta)
             return 'movedown' + res; //return how many steps you need to move down
         return ''; //you don't need to move'

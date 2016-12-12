@@ -9,7 +9,7 @@
 
         <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
         <!-- build:[href] css/everything.min.css -->
-        <link rel="stylesheet" type="text/css" href="css/PetMatch.css">
+        <link rel="stylesheet" type="text/css" href="css/game.css">
         <!-- /build -->
         
         <!-- build:js js/everything.min.js -->
@@ -26,26 +26,32 @@
             <div ng-repeat="row in [0, 1, 2, 3, 4, 5, 6, 7, 8]"
                 style="position:absolute; top:{{row * 11}}%; left:0; width:100%; height:11%;">
                 <div ng-repeat="col in [0, 1, 2, 3, 4, 5, 6, 7, 8]"
-                style="position:absolute; top:0; left:{{col * 11}}%; width:11%; height:100%;"
+                style="position:absolute; top:30px; left:{{col * 11}}%; width:11%; height:100%;"
                 ng-class="{r: col < 8, b: row < 8}"
                 id="{{'e2e_test_div_' + row + 'x' + col}}">
                     <div id="{{'img_container_' + row + '_' + col}}"
-                    ng-class="game.getMoveDownClass(row,col)"><!-- /find how many steps this cell needs to move down -->
-                        <img ng-if = "game.isPieceA(row, col)" src = "images/bird.gif"
+                    ng-class="game.getMoveDownClass(row,col)">
+                        <img ng-if = "game.isPieceA(row, col)" src = "imgs/bird.gif"
                             id="{{'e2e_test_pieceA_' + row + 'x' + col}}"
                             width="100%" height="100%"> 
-                        <img src = "images/crab.gif" ng-if = "game.isPieceB(row, col)"
+                        <img src = "imgs/crab.gif" ng-if = "game.isPieceB(row, col)"
                             id="{{'e2e_test_pieceB_' + row + 'x' + col}}"
                             width="100%" height="100%">                
-                        <img src = "images/cat.gif"  ng-if = "game.isPieceC(row, col)"
+                        <img src = "imgs/cat.gif"  ng-if = "game.isPieceC(row, col)"
                             id="{{'e2e_test_pieceC_' + row + 'x' + col}}"
                             width="100%" height="100%">                
-                        <img src = "images/rabbit.gif" ng-if = "game.isPieceD(row, col)"
+                        <img src = "imgs/rabbit.gif" ng-if = "game.isPieceD(row, col)"
                             id="{{'e2e_test_pieceD_' + row + 'x' + col}}"
                             width="100%" height="100%">
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class = "center" position="relative"> 
+                {{ "Player 0: score " + game.getScores()[0] + " @ step " + game.getCompletedSteps()[0] + "/" + game.getTotSteps() }}
+                <br>
+                {{ "Player 1: score " + game.getScores()[1] + " @ step " + game.getCompletedSteps()[1] + "/" + game.getTotSteps() }}
         </div>
     </body>
 <html>

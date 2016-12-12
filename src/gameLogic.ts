@@ -34,42 +34,21 @@ module gameLogic {
   export const PARAMS : any = {
     ROWS : 9,
     COLS : 9,
-    TOTALSTEPS : 15
+    TOTALSTEPS : 30
   };
   const NUM_PLAYERS = 2;
   const NUM_TYPES = 4;
+  let testMode : boolean = false;
 
   /**
    * @ Return the initial PetMatch board.
    *   a ROWSxCOLS matrix containing four types of pets. 
    **/
   export function getInitialBoard() : Board {
-   /*
-    let board : Board = [
-      ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
-      ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
-      ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
-      ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
-      ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
-      ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
-      ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
-      ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
-      ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-    ];     */
-    
-    let board : Board = [];
-    //let board :Board = getRandomBoard();
-    for (let i = 0; i < PARAMS.ROWS; i++) {
-      board[i] = [];
-      for (let j = 0; j < PARAMS.COLS; j++) {
-        board[i][j] = getRandomPet();
-      }  
-    }
-    //some errors need to be corrected for shouldshuffle
-    /*
-    while (shouldShuffle) {
-      board = getRandomBoard();
-    } */
+    let board :Board = getRandomBoard();
+    while (shouldShuffle(board)) {
+      board = shuffle();
+    } 
     return board;
   }
 
@@ -85,6 +64,9 @@ module gameLogic {
   }
 
   function getRandomPet() : string {
+    if (testMode) {
+      return "A";
+    }
     let ans = "";
     let randPet = Math.floor(Math.random() * NUM_TYPES + 1);
     if (randPet === 1) {
@@ -97,6 +79,10 @@ module gameLogic {
       ans = 'D';
     } 
     return ans;
+  }
+
+  export function setTestMode(mode : boolean) {
+    testMode = mode;
   }
 
   export function getInitialState() : IState {
@@ -183,10 +169,8 @@ module gameLogic {
    * @ Return info of all matched pets with pet in fromDelta or toDelta.
    **/
    export function getMatch(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : lineDelta[] {
-    
     let match : lineDelta[] = [];
     let i : number = 0;
-   
     //swap on temp board
     let petFrom : string = board[fromDelta.row][fromDelta.col];
     board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
@@ -259,7 +243,7 @@ module gameLogic {
       match[i++] = lDelta;
     }
 
-    //check check alignment for pet currently in toIndex
+    //check alignment for pet currently in toIndex
     target = board[toDelta.row][toDelta.col];
     count = 1;
     col = toDelta.col;
@@ -325,8 +309,8 @@ module gameLogic {
 
 export function shouldShuffle(board : Board) : boolean {
   let petsToSwitch : petSwitch = getPossibleMove(board);
-  if (petsToSwitch.fromDelta.row ===  petsToSwitch.toDelta.row 
-        && petsToSwitch.fromDelta.col ===  petsToSwitch.toDelta.col) {
+  if (!petsToSwitch.fromDelta.row && !petsToSwitch.toDelta.row 
+        && !petsToSwitch.fromDelta.col && !petsToSwitch.toDelta.col) {
           return true;
   }
   return false;
@@ -362,13 +346,15 @@ export function getPossibleMove(board : Board) : petSwitch{
             for (let j = 1; j < gameLogic.PARAMS.COLS; j++) {
                 deltaF.col = j;
                 deltaT.col = j - 1;
-                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                let boardTemp1 = angular.copy(board);
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
+                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -378,13 +364,15 @@ export function getPossibleMove(board : Board) : petSwitch{
             for (let j = 1; j < gameLogic.PARAMS.ROWS; j++) {
                 deltaF.row = j;
                 deltaT.row = j - 1;
-                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp, deltaF, deltaT);
+                let boardTemp2 = angular.copy(board);
+                let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
                 if (getMatchSize(tpMatch) > getMatchSize(match)) {
                     match = tpMatch;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
+                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -399,7 +387,7 @@ export function getPossibleMove(board : Board) : petSwitch{
         let count : number = 0;
         for (let i = 0; i < match.length; i++) {
             let matchI : lineDelta = match[i];
-            count += matchI.endDelta.row - matchI.startDelta.row + matchI.endDelta.col - matchI.startDelta.col;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row )+ Math.abs(matchI.endDelta.col - matchI.startDelta.col);
         }
         return count;
     }
@@ -455,6 +443,11 @@ export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : Boa
   }
   let changedDelta : BoardDelta[] = getChangedDelta(match);
   
+  //swap on temp board
+  let petFrom : string = board[fromDelta.row][fromDelta.col];
+  board[fromDelta.row][fromDelta.col] = board[toDelta.row][toDelta.col];
+  board[toDelta.row][toDelta.col] = petFrom;
+
   let count : number = 0;
   //mark elements to be removed
   let visited : boolean[][] = [];
@@ -551,21 +544,17 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     if (!stateBeforeMove) {
       stateBeforeMove = getInitialState();
     }
-    //let fromDelta : BoardDelta = stateBeforeMove.fromDelta;
-    //let toDelta : BoardDelta = stateBeforeMove.toDelta;
-    
-    //let scores : number[] = stateBeforeMove.scores;
     if ( isTie(stateBeforeMove) || getWinner(stateBeforeMove) !== '') {
       throw new Error("Can only make a move if the game is not over!");
     }
     if (!fromDelta || !toDelta) {
       throw new Error("Cannot have empty delta value!");
     }
-    if (angular.equals(fromDelta, toDelta)) {
+    if (Math.abs(fromDelta.row - toDelta.row) + Math.abs(fromDelta.col - toDelta.col) != 1) {
       throw new Error("Can only swap adjacent pets!");
     } 
     stateBeforeMove.fromDelta = fromDelta;
-    stateBeforeMove.toDelta = fromDelta;
+    stateBeforeMove.toDelta = toDelta;
     let changedBoardCount : changedDeltaAndBoardCount = updateBoard(stateBeforeMove.board, fromDelta, toDelta);
     //get state after movement 
     let stateAfterMove : IState = checkBoard(stateBeforeMove, turnIndexBeforeMove, changedBoardCount);
@@ -603,16 +592,16 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
     let expectedMove = createMove(stateBeforeMove , fromDelta, toDelta, turnIndexBeforeMove);
     
     if (!angular.equals(move, expectedMove)) {
-      throw new Error("Expected move=" + angular.toJson(expectedMove, true) +
-          ", but got stateTransition=" + angular.toJson(stateTransition, true))
+      throw new Error("Expected move =" + angular.toJson(expectedMove, true) +
+          ", but got stateTransition =" + angular.toJson(stateTransition, true))
     } 
   } 
 
    export function checkMoveOkN(stateTransition: IStateTransition): void {
-
    }
 
-
   export function forSimpleTestHtml() {
+    let board : Board = getRandomBoard();
+    return getPossibleMove(board);
   }
 }
