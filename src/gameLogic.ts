@@ -84,15 +84,15 @@ module gameLogic {
   }
 
   export function getInitialState() : IState {
-    // let scores : number[] = [];
-    // for (let i = 0; i < NUM_PLAYERS; i++) {
-    //   scores[i] = 0;
-    // }
+    let scores : number[] = [];
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+      scores[i] = 0;
+    }
     return {
       board : getInitialBoard(), 
       fromDelta : null,
       toDelta : null,
-      scores : [0,0],
+      scores : scores,
       completedSteps : [0,0],
       changedDelta : null
     };
@@ -265,7 +265,8 @@ module gameLogic {
       }
     }
     startDelta.col = col + 1;
-    if (count >= 3 && fromDelta.row != toDelta.row) {
+    if (count >= 3 && (fromDelta.row != toDelta.row || 
+        board[fromDelta.row][fromDelta.col] != board[toDelta.row][toDelta.col] )) {
       let lDelta :lineDelta = {
         startDelta : startDelta,
         endDelta : endDelta
@@ -295,7 +296,8 @@ module gameLogic {
     }
     startDelta.row = row + 1;
 
-    if (count >= 3 && fromDelta.col != toDelta.col) {
+    if (count >= 3 && (fromDelta.col != toDelta.col || 
+        board[fromDelta.row][fromDelta.col] != board[toDelta.row][toDelta.col])) {
       let lDelta :lineDelta = {
         startDelta : startDelta,
         endDelta : endDelta
@@ -487,6 +489,7 @@ function getChangedDelta(match : lineDelta[]) : BoardDelta[] {
 export function updateBoard(board : Board, fromDelta : BoardDelta, toDelta : BoardDelta) : changedDeltaAndBoardCount {
   let boardTemp = angular.copy(board);
   let match : lineDelta[] = getMatch(boardTemp, fromDelta, toDelta);
+  log.info("match size " + match.length);
   if (!match || match.length === 0) {
     throw new Error("Can only make a move for pet matches of 3 or over 3!");
   }
@@ -579,8 +582,6 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
   stateAfterMove.changedDelta = boardCount.changedDelta;
   stateAfterMove.board = boardCount.board;
-  
- 
   stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
   stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
   return stateAfterMove;
