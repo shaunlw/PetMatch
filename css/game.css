@@ -16,9 +16,11 @@ body {
   from {opacity: 1;  transform: translateY(0)}
   to {opacity: 0.1;  transform: translateY(-25%)}
 }
+
 .scoreNotice {
   animation: Fade 1s ease-out;
   transform: translate3d(0,0,0);
+  color: red;
 }
 
 /*.img_container {
@@ -107,11 +109,14 @@ body {
 .center {
   font-family: sans-serif;
   position: absolute;
-  left: 40%;
-  top: 10px;
+  top: 5%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -120px;
+
   background: #FAF0E6;
   height: 40px;
-  width: 250px;
+  width: 240px;
 }
 
 body {

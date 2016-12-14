@@ -84,15 +84,15 @@ module gameLogic {
   }
 
   export function getInitialState() : IState {
-    let scores : number[] = [];
-    for (let i = 0; i < NUM_PLAYERS; i++) {
-      scores[i] = 0;
-    }
+    // let scores : number[] = [];
+    // for (let i = 0; i < NUM_PLAYERS; i++) {
+    //   scores[i] = 0;
+    // }
     return {
       board : getInitialBoard(), 
       fromDelta : null,
       toDelta : null,
-      scores : scores,
+      scores : [0,0],
       completedSteps : [0,0],
       changedDelta : null
     };
@@ -579,6 +579,8 @@ function checkBoard(stateBeforeMove : IState, turnIndexBeforeMove : number, boar
   let stateAfterMove : IState = angular.copy(stateBeforeMove);
   stateAfterMove.changedDelta = boardCount.changedDelta;
   stateAfterMove.board = boardCount.board;
+  
+ 
   stateAfterMove.scores[turnIndexBeforeMove] = stateBeforeMove.scores[turnIndexBeforeMove] + boardCount.count * 10;
   stateAfterMove.completedSteps[turnIndexBeforeMove] = stateBeforeMove.completedSteps[turnIndexBeforeMove] + 1;
   return stateAfterMove;
