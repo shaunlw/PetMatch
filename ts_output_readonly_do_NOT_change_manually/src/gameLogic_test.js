@@ -27,7 +27,25 @@ describe("In petMatch", function () {
         ['C', 'D', 'A', 'B', 'C', 'D', 'A', 'B', 'C'],
         ['D', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'],
         ['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D', 'A']];
-    function expectMove(isOk, turnIndexBeforeMove, boardBeforeMove, scoresBeforeMove, completedStepsBeforeMove, fromDelta, toDelta, boardAfterMove, turnIndexAfterMove, scoresAfterMove, completedStepsAfterMove, changedDeltaAfterMove, endMatchScores) {
+    function expectStateTransition(isOk, stateTransition) {
+        if (isOk) {
+            gameLogic.checkMoveOk(stateTransition);
+        }
+        else {
+            // We expect an exception to be thrown :)
+            var didThrowException = false;
+            try {
+                gameLogic.checkMoveOk(stateTransition);
+            }
+            catch (e) {
+                didThrowException = true;
+            }
+            if (!didThrowException) {
+                throw new Error("We expect an illegal move, but checkMoveOk didn't throw any exception!");
+            }
+        }
+    }
+    function expectMove(mode, isOk, turnIndexBeforeMove, boardBeforeMove, scoresBeforeMove, completedStepsBeforeMove, fromDelta, toDelta, boardAfterMove, turnIndexAfterMove, scoresAfterMove, completedStepsAfterMove, changedDeltaAfterMove, endMatchScores) {
         var stateTransition = {
             turnIndexBeforeMove: turnIndexBeforeMove,
             stateBeforeMove: boardBeforeMove ? {
@@ -48,44 +66,46 @@ describe("In petMatch", function () {
             },
             numberOfPlayers: null
         };
-        gameLogic.setTestMode(true);
-        if (isOk) {
-            gameLogic.checkMoveOk(stateTransition);
+        if (mode === 1) {
+            gameLogic.setTestMode(true);
         }
-        else {
-            // We expect an exception to be thrown :)
-            var didThrowException = false;
-            try {
-                gameLogic.checkMoveOk(stateTransition);
-            }
-            catch (e) {
-                didThrowException = true;
-            }
-            if (!didThrowException) {
-                throw new Error("We expect an illegal move, but checkMoveOk didn't throw any exception!");
-            }
+        if (mode === 0) {
+            gameLogic.setTestMode(false);
         }
+        expectStateTransition(isOk, stateTransition);
     }
+    it("Initial state", function () {
+        expectStateTransition(!OK, {
+            turnIndexBeforeMove: PLAYER0_TURN,
+            stateBeforeMove: null,
+            move: {
+                turnIndexAfterMove: PLAYER1_TURN,
+                endMatchScores: NO_ONE_WINS,
+                stateAfterMove: null
+            },
+            numberOfPlayers: null
+        });
+    });
     it("Making a move that forms a match of 3 or over 3 is legal", function () {
-        expectMove(OK, PLAYER0_TURN, [
+        expectMove(1, OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
-            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
-            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
+            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'C'],
+            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'A'],
             ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
-            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
-            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
-            ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
+            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'D'],
+            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'A', 'C'],
+            ['D', 'B', 'B', 'C', 'C', 'C', 'A', 'C', 'A'],
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
         ], [0, 0], [0, 0], { row: 0, col: 1 }, { row: 1, col: 1 }, [
             ['A', 'A', 'A', 'A', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'C', 'C', 'D', 'D', 'C', 'B'],
-            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
-            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
+            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'C'],
+            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'A'],
             ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
-            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
-            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
-            ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
+            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'D'],
+            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'A', 'C'],
+            ['D', 'B', 'B', 'C', 'C', 'C', 'A', 'C', 'A'],
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
         ], PLAYER1_TURN, [30, 0], [1, 0], [
             { row: 1, col: 1 },
@@ -96,8 +116,8 @@ describe("In petMatch", function () {
             { row: 0, col: 3 },
         ], NO_ONE_WINS);
     });
-    it("Making a move that forms a match of 3 or over 3 is legal 2", function () {
-        expectMove(OK, PLAYER0_TURN, [
+    it("Making a move that swap non-adjacent pets are illegal", function () {
+        expectMove(1, !OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
@@ -107,9 +127,15 @@ describe("In petMatch", function () {
             ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
             ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-        ], [0, 0], [0, 0], { row: 0, col: 1 }, { row: 1, col: 1 }, [
-            ['A', 'A', 'A', 'A', 'C', 'A', 'A', 'B', 'C'],
-            ['C', 'A', 'B', 'C', 'C', 'D', 'D', 'C', 'B'],
+        ], [0, 0], [0, 0], { row: 0, col: 1 }, { row: 2, col: 1 }, null, PLAYER1_TURN, [0, 0], [0, 0], null, NO_ONE_WINS);
+    });
+    it("Expected move and move not matching", function () {
+        expectMove(0, !OK, PLAYER0_TURN, gameLogic.getInitialBoard(), [0, 0], [0, 0], { row: 0, col: 1 }, { row: 1, col: 1 }, null, PLAYER1_TURN, [0, 0], [0, 0], null, NO_ONE_WINS);
+    });
+    it("Making a move that has null fromDelta is illegal", function () {
+        expectMove(1, !OK, PLAYER0_TURN, [
+            ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
+            ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
             ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
             ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
@@ -117,17 +143,23 @@ describe("In petMatch", function () {
             ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
             ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
-        ], PLAYER1_TURN, [30, 0], [1, 0], [
-            { row: 1, col: 1 },
-            { row: 0, col: 1 },
-            { row: 1, col: 2 },
-            { row: 0, col: 2 },
-            { row: 1, col: 3 },
-            { row: 0, col: 3 },
-        ], NO_ONE_WINS);
+        ], [0, 0], [0, 0], null, { row: 2, col: 1 }, null, PLAYER1_TURN, [0, 0], [0, 0], null, NO_ONE_WINS);
+    });
+    it("Making a move that has null toDelta is illegal", function () {
+        expectMove(1, !OK, PLAYER0_TURN, [
+            ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
+            ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
+            ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
+            ['C', 'A', 'A', 'D', 'B', 'D', 'D', 'B', 'C'],
+            ['D', 'C', 'A', 'C', 'D', 'A', 'B', 'D', 'C'],
+            ['D', 'B', 'B', 'A', 'C', 'D', 'A', 'A', 'B'],
+            ['A', 'C', 'D', 'D', 'A', 'B', 'B', 'C', 'A'],
+            ['D', 'B', 'B', 'A', 'C', 'C', 'A', 'B', 'B'],
+            ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
+        ], [0, 0], [0, 0], { row: 0, col: 1 }, null, null, PLAYER1_TURN, [0, 0], [0, 0], null, NO_ONE_WINS);
     });
     it("Making a move that cannot form a match of 3 or over 3 is illegal", function () {
-        expectMove(!OK, PLAYER0_TURN, [
+        expectMove(1, !OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
@@ -139,11 +171,19 @@ describe("In petMatch", function () {
             ['A', 'C', 'B', 'C', 'C', 'A', 'A', 'B', 'C']
         ], [0, 0], [0, 0], { row: 0, col: 0 }, { row: 0, col: 1 }, null, PLAYER1_TURN, [0, 0], [1, 0], null, NO_ONE_WINS);
     });
-    it("Making a move that forms a match of 3 or over 3 is legal && should shuffle", function () {
-        expectMove(!OK, PLAYER0_TURN, BOARDSHOULDSHUFFLE, [0, 0], [0, 0], { row: 0, col: 1 }, { row: 1, col: 1 }, null, PLAYER1_TURN, [250, 0], [1, 0], null, NO_ONE_WINS);
+    it("Expected move doesn't match move", function () {
+        expectMove(1, OK, PLAYER0_TURN, gameLogic.getInitialBoard(), [0, 0], [0, 0], { row: 0, col: 1 }, { row: 1, col: 1 }, BOARDSAME, PLAYER1_TURN, [250, 0], [1, 0], [
+            { "row": 0, "col": 0 }, { "row": 0, "col": 1 }, { "row": 0, "col": 2 }, { "row": 0, "col": 3 },
+            { "row": 0, "col": 4 }, { "row": 0, "col": 5 }, { "row": 0, "col": 6 }, { "row": 0, "col": 7 },
+            { "row": 0, "col": 8 }, { "row": 8, "col": 1 }, { "row": 7, "col": 1 }, { "row": 6, "col": 1 },
+            { "row": 5, "col": 1 }, { "row": 4, "col": 1 }, { "row": 3, "col": 1 }, { "row": 2, "col": 1 },
+            { "row": 1, "col": 1 }, { "row": 1, "col": 0 }, { "row": 1, "col": 2 }, { "row": 1, "col": 3 },
+            { "row": 1, "col": 4 }, { "row": 1, "col": 5 }, { "row": 1, "col": 6 }, { "row": 1, "col": 7 },
+            { "row": 1, "col": 8 }
+        ], NO_ONE_WINS);
     });
     it("Making a move that leads to tie is legal", function () {
-        expectMove(OK, PLAYER0_TURN, [
+        expectMove(1, OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
@@ -173,7 +213,7 @@ describe("In petMatch", function () {
         ], TIE_ENDSCORES);
     });
     it("Making a move that leads to a winner is legal", function () {
-        expectMove(OK, PLAYER0_TURN, [
+        expectMove(1, OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],
@@ -203,7 +243,7 @@ describe("In petMatch", function () {
         ], PLAYER0_WIN_ENDSCORES);
     });
     it("Making a move when game is over is illegal", function () {
-        expectMove(!OK, PLAYER0_TURN, [
+        expectMove(1, !OK, PLAYER0_TURN, [
             ['A', 'B', 'B', 'C', 'C', 'A', 'A', 'B', 'C'],
             ['C', 'A', 'B', 'B', 'C', 'D', 'D', 'C', 'B'],
             ['A', 'B', 'D', 'C', 'B', 'A', 'A', 'B', 'A'],

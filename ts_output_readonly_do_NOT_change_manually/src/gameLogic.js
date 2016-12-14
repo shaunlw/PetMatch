@@ -239,7 +239,7 @@ var gameLogic;
             }
         }
         startDelta.col = col + 1;
-        if (count >= 3) {
+        if (count >= 3 && fromDelta.row != toDelta.row) {
             var lDelta = {
                 startDelta: startDelta,
                 endDelta: endDelta
@@ -269,7 +269,7 @@ var gameLogic;
             }
         }
         startDelta.row = row + 1;
-        if (count >= 3) {
+        if (count >= 3 && fromDelta.col != toDelta.col) {
             var lDelta = {
                 startDelta: startDelta,
                 endDelta: endDelta
@@ -310,7 +310,7 @@ var gameLogic;
             row: 0,
             col: 0
         };
-        var match = [];
+        var maxSize = 0;
         for (var i = 0; i < gameLogic.PARAMS.ROWS; i++) {
             deltaF.row = i;
             deltaT.row = i;
@@ -319,8 +319,9 @@ var gameLogic;
                 deltaT.col = j - 1;
                 var boardTemp1 = angular.copy(board);
                 var tpMatch = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
-                if (getMatchSize(tpMatch) > getMatchSize(match)) {
-                    match = tpMatch;
+                var size = getMatchSize(tpMatch, deltaF, deltaT);
+                if (size > maxSize) {
+                    maxSize = size;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
@@ -336,8 +337,9 @@ var gameLogic;
                 deltaT.row = j - 1;
                 var boardTemp2 = angular.copy(board);
                 var tpMatch = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
-                if (getMatchSize(tpMatch) > getMatchSize(match)) {
-                    match = tpMatch;
+                var size = getMatchSize(tpMatch, deltaF, deltaT);
+                if (size > maxSize) {
+                    maxSize = size;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
@@ -352,11 +354,71 @@ var gameLogic;
         return possibleMove;
     }
     gameLogic.getPossibleMove = getPossibleMove;
-    function getMatchSize(match) {
+    function getMatchSize(match, deltaF, deltaT) {
         var count = 0;
+        var rowF = false;
+        var rowT = false;
+        var colF = false;
+        var colT = false;
         for (var i = 0; i < match.length; i++) {
             var matchI = match[i];
-            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + Math.abs(matchI.endDelta.col - matchI.startDelta.col);
+            if (matchI.endDelta.row === matchI.startDelta.row
+                && (matchI.endDelta.row === deltaF.row || matchI.endDelta.row === deltaT.row)) {
+                if (deltaF.row === deltaT.row && !rowF && !rowT) {
+                    rowF = true;
+                    rowT = true;
+                    count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+                }
+                else if (!rowF) {
+                    rowF = true;
+                    count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+                }
+                else if (!rowT) {
+                    rowT = true;
+                    count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+                }
+                else {
+                    count += Math.abs(matchI.endDelta.col - matchI.startDelta.col);
+                }
+                if (matchI.endDelta.row === deltaF.row &&
+                    deltaF.col >= matchI.startDelta.col && deltaF.col <= matchI.endDelta.col) {
+                    colF = true;
+                }
+                if (matchI.endDelta.row === deltaT.row &&
+                    deltaT.col >= matchI.startDelta.col && deltaT.col <= matchI.endDelta.col) {
+                    colT = true;
+                }
+            }
+            else if (matchI.endDelta.col === matchI.startDelta.col
+                && (matchI.endDelta.col === deltaF.col || matchI.endDelta.col === deltaT.col)) {
+                if (deltaF.col === deltaT.col && !colF && !colT) {
+                    colF = true;
+                    colT = true;
+                    count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;
+                }
+                else if (!colF) {
+                    colF = true;
+                    count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;
+                }
+                else if (!colT) {
+                    colT = true;
+                    count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;
+                }
+                else {
+                    count += Math.abs(matchI.endDelta.row - matchI.startDelta.row);
+                }
+                if (matchI.endDelta.col === deltaF.col &&
+                    deltaF.row >= matchI.startDelta.row && deltaF.row <= matchI.endDelta.row) {
+                    rowF = true;
+                }
+                if (matchI.endDelta.col === deltaT.col &&
+                    deltaT.row >= matchI.startDelta.row && deltaT.row <= matchI.endDelta.row) {
+                    rowT = true;
+                }
+            }
+            else {
+                throw new Error("wrong matches");
+            }
         }
         return count;
     }

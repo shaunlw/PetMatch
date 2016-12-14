@@ -17,9 +17,7 @@ interface petSwitch {
   fromDelta : BoardDelta,
   toDelta : BoardDelta
 }
- /** 
-  * Record the state of current player.
-  **/
+
 interface IState {
   board : Board;
   fromDelta : BoardDelta;
@@ -267,7 +265,7 @@ module gameLogic {
       }
     }
     startDelta.col = col + 1;
-    if (count >= 3 ) {
+    if (count >= 3 && fromDelta.row != toDelta.row) {
       let lDelta :lineDelta = {
         startDelta : startDelta,
         endDelta : endDelta
@@ -297,7 +295,7 @@ module gameLogic {
     }
     startDelta.row = row + 1;
 
-    if (count >= 3) {
+    if (count >= 3 && fromDelta.col != toDelta.col) {
       let lDelta :lineDelta = {
         startDelta : startDelta,
         endDelta : endDelta
@@ -338,8 +336,7 @@ export function getPossibleMove(board : Board) : petSwitch{
             row : 0,
             col : 0
         };
-        let match : lineDelta[] = [];
-
+        let maxSize : number = 0;
         for (let i = 0; i < gameLogic.PARAMS.ROWS; i++) {
             deltaF.row = i;
             deltaT.row = i;
@@ -348,13 +345,13 @@ export function getPossibleMove(board : Board) : petSwitch{
                 deltaT.col = j - 1;
                 let boardTemp1 = angular.copy(board);
                 let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp1, deltaF, deltaT);
-                if (getMatchSize(tpMatch) > getMatchSize(match)) {
-                    match = tpMatch;
+                let size : number = getMatchSize(tpMatch, deltaF, deltaT);
+                if (size > maxSize) {
+                    maxSize = size;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
-                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -366,13 +363,13 @@ export function getPossibleMove(board : Board) : petSwitch{
                 deltaT.row = j - 1;
                 let boardTemp2 = angular.copy(board);
                 let tpMatch : lineDelta[] = gameLogic.getMatch(boardTemp2, deltaF, deltaT);
-                if (getMatchSize(tpMatch) > getMatchSize(match)) {
-                    match = tpMatch;
+                let size : number = getMatchSize(tpMatch, deltaF, deltaT);
+                if (size > maxSize) {
+                    maxSize = size;
                     deltaFrom.row = deltaF.row;
                     deltaFrom.col = deltaF.col;
                     deltaTo.row = deltaT.row;
                     deltaTo.col = deltaT.col;
-                    //window.alert(deltaTo.row + " " + deltaTo.col);
                 }
             }
         }
@@ -383,14 +380,66 @@ export function getPossibleMove(board : Board) : petSwitch{
         return possibleMove;
     }
     
-    function getMatchSize(match : lineDelta[]) : number {
-        let count : number = 0;
-        for (let i = 0; i < match.length; i++) {
-            let matchI : lineDelta = match[i];
-            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row )+ Math.abs(matchI.endDelta.col - matchI.startDelta.col);
+function getMatchSize(match : lineDelta[], deltaF : BoardDelta, deltaT : BoardDelta) : number {
+  let count : number = 0;
+  let rowF : boolean = false;
+  let rowT : boolean = false;
+  let colF : boolean = false;
+  let colT : boolean = false;
+  for (let i = 0; i < match.length; i++) {
+      let matchI : lineDelta = match[i];
+      if (matchI.endDelta.row === matchI.startDelta.row
+        && (matchI.endDelta.row === deltaF.row || matchI.endDelta.row === deltaT.row)) {
+          if (deltaF.row === deltaT.row && !rowF && !rowT) {
+            rowF = true;
+            rowT = true;
+            count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+          } else if (!rowF) {
+            rowF= true;
+            count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+          } else if (!rowT) {
+            rowT = true;
+            count += Math.abs(matchI.endDelta.col - matchI.startDelta.col) + 1;
+          } else {
+            count += Math.abs(matchI.endDelta.col - matchI.startDelta.col);
+          }
+          if (matchI.endDelta.row === deltaF.row &&
+              deltaF.col >= matchI.startDelta.col && deltaF.col <= matchI.endDelta.col) {
+              colF = true;
+            }
+          if (matchI.endDelta.row === deltaT.row && 
+              deltaT.col >= matchI.startDelta.col && deltaT.col <= matchI.endDelta.col) {
+            colT = true;
+          }
+        } else if (matchI.endDelta.col === matchI.startDelta.col
+        && (matchI.endDelta.col === deltaF.col || matchI.endDelta.col === deltaT.col)) {
+          if (deltaF.col === deltaT.col && !colF && !colT) {
+            colF = true;
+            colT = true;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;
+          } else if (!colF) {
+            colF= true;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;
+          } else if (!colT) {
+            colT = true;
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row) + 1;          
+          } else {
+            count += Math.abs(matchI.endDelta.row - matchI.startDelta.row );
+          }
+          if (matchI.endDelta.col === deltaF.col &&
+              deltaF.row >= matchI.startDelta.row && deltaF.row <= matchI.endDelta.row) {
+              rowF = true;
+            }
+          if (matchI.endDelta.col === deltaT.col && 
+              deltaT.row >= matchI.startDelta.row && deltaT.row <= matchI.endDelta.row) {
+            rowT = true;
+          }
+        } else {
+          throw new Error("wrong matches");
         }
-        return count;
-    }
+  }
+    return count;
+}
 
 function getChangedDelta(match : lineDelta[]) : BoardDelta[] {
   let changedDelta : BoardDelta[] = [];
