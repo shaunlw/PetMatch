@@ -32186,15 +32186,15 @@ var gameLogic;
     }
     gameLogic.setTestMode = setTestMode;
     function getInitialState() {
-        var scores = [];
-        for (var i = 0; i < NUM_PLAYERS; i++) {
-            scores[i] = 0;
-        }
+        // let scores : number[] = [];
+        // for (let i = 0; i < NUM_PLAYERS; i++) {
+        //   scores[i] = 0;
+        // }
         return {
             board: getInitialBoard(),
             fromDelta: null,
             toDelta: null,
-            scores: scores,
+            scores: [0, 0],
             completedSteps: [0, 0],
             changedDelta: null
         };
@@ -32774,32 +32774,65 @@ var game;
     var PARAMS = gameLogic.PARAMS;
     game.currentUpdateUI = null;
     game.didMakeMove = false; // You can only make one move per updateUI
+    game.animationEnded = false;
     game.animationEndedTimeout = null;
     game.state = null;
     game.board = null;
     game.dragAndDropStartPos = null;
     game.dragAndDropElement = null;
-    function getScores() {
-        return game.state.scores;
+    function getCurScore() {
+        var afterscoresum = 0;
+        var beforePlayer0 = 0;
+        var beforePlayer1 = 0;
+        var afterPlayer0 = 0;
+        var afterPlayer1 = 0;
+        if (game.currentUpdateUI.move.stateAfterMove) {
+            afterPlayer0 = game.currentUpdateUI.move.stateAfterMove.scores[0];
+            afterPlayer1 = game.currentUpdateUI.move.stateAfterMove.scores[1];
+            afterscoresum = afterPlayer0 + afterPlayer1;
+        }
+        var beforescoresum = 0;
+        if (game.currentUpdateUI.stateBeforeMove) {
+            beforePlayer0 = game.currentUpdateUI.stateBeforeMove.scores[0];
+            beforePlayer1 = game.currentUpdateUI.stateBeforeMove.scores[1];
+            beforescoresum = beforePlayer0 + beforePlayer1;
+        }
+        var b = false;
+        if (afterPlayer0 - beforePlayer0 > 0) {
+            b = game.currentUpdateUI.yourPlayerIndex === 0;
+            log.info("scoreby0", game.currentUpdateUI.yourPlayerIndex);
+        }
+        else if (afterPlayer1 - beforePlayer1 > 0) {
+            b = game.currentUpdateUI.yourPlayerIndex === 1;
+            log.info("scoreby1", game.currentUpdateUI.yourPlayerIndex);
+        }
+        return afterscoresum - beforescoresum;
     }
-    game.getScores = getScores;
+    game.getCurScore = getCurScore;
+    function getMyScore() {
+        return game.state.scores[game.currentUpdateUI.move.turnIndexAfterMove];
+    }
+    game.getMyScore = getMyScore;
+    function shouldShowScore() {
+        return !game.animationEnded && getMyScore() !== 0;
+    }
+    game.shouldShowScore = shouldShowScore;
+    function getOpponentScore() {
+        return game.state.scores[1 - game.currentUpdateUI.move.turnIndexAfterMove];
+    }
+    game.getOpponentScore = getOpponentScore;
     function getTotSteps() {
         return PARAMS.TOTALSTEPS;
     }
     game.getTotSteps = getTotSteps;
-    // export function getStepScore(): number {//return the single score obtained by previous move
-    //     return state.lastStepScores[gameLogic.getTurnIndexBfMv()];
-    // }
-    // export function getIndexBfMv(): number {
-    //     return gameLogic.getTurnIndexBfMv()
-    // }
-    // export function shouldShowScore(): boolean {//determine if score animation should be shown in html
-    //     return !(getStepScore() == 0);
-    // }
-    function getCompletedSteps() {
-        return game.state.completedSteps;
+    function getMyCompletedSteps() {
+        return game.state.completedSteps[game.currentUpdateUI.move.turnIndexAfterMove];
     }
-    game.getCompletedSteps = getCompletedSteps;
+    game.getMyCompletedSteps = getMyCompletedSteps;
+    function getOpponentCompletedSteps() {
+        return game.state.completedSteps[1 - game.currentUpdateUI.move.turnIndexAfterMove];
+    }
+    game.getOpponentCompletedSteps = getOpponentCompletedSteps;
     function getTranslations() {
         return {};
     }
@@ -32866,7 +32899,7 @@ var game;
             dragAndDropStart = dragAndDropPos;
             game.dragAndDropElement = document.getElementById("img_container_" + game.dragAndDropStartPos.row + "_" + game.dragAndDropStartPos.col);
             var style = game.dragAndDropElement.style;
-            style['z-index'] = 20;
+            style['z-index'] = 100;
             setDragAndDropElementPos(dragAndDropPos, cellSize);
             return;
         }
@@ -32932,6 +32965,7 @@ var game;
     function animationEndedCallback() {
         log.info("Animation ended");
         maybeSendComputerMove();
+        game.animationEnded = true;
     }
     function clearAnimationTimeout() {
         if (game.animationEndedTimeout) {
@@ -32941,6 +32975,7 @@ var game;
     }
     function updateUI(params) {
         log.info("Game got updateUI :", params);
+        game.animationEnded = false;
         game.didMakeMove = false; // Only one move per updateUI
         game.currentUpdateUI = params;
         clearAnimationTimeout();
@@ -33039,6 +33074,7 @@ var game;
             game.currentUpdateUI.move.turnIndexAfterMove >= 0 &&
             game.currentUpdateUI.yourPlayerIndex === game.currentUpdateUI.move.turnIndexAfterMove; // it's my turn
     }
+    game.isMyTurn = isMyTurn;
     function isPieceA(row, col) {
         return game.state.board[row][col] === 'A';
     }
