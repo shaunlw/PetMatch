@@ -32186,15 +32186,15 @@ var gameLogic;
     }
     gameLogic.setTestMode = setTestMode;
     function getInitialState() {
-        // let scores : number[] = [];
-        // for (let i = 0; i < NUM_PLAYERS; i++) {
-        //   scores[i] = 0;
-        // }
+        var scores = [];
+        for (var i = 0; i < NUM_PLAYERS; i++) {
+            scores[i] = 0;
+        }
         return {
             board: getInitialBoard(),
             fromDelta: null,
             toDelta: null,
-            scores: [0, 0],
+            scores: scores,
             completedSteps: [0, 0],
             changedDelta: null
         };
@@ -32370,7 +32370,8 @@ var gameLogic;
             }
         }
         startDelta.col = col + 1;
-        if (count >= 3 && fromDelta.row != toDelta.row) {
+        if (count >= 3 && (fromDelta.row != toDelta.row ||
+            board[fromDelta.row][fromDelta.col] != board[toDelta.row][toDelta.col])) {
             var lDelta = {
                 startDelta: startDelta,
                 endDelta: endDelta
@@ -32400,7 +32401,8 @@ var gameLogic;
             }
         }
         startDelta.row = row + 1;
-        if (count >= 3 && fromDelta.col != toDelta.col) {
+        if (count >= 3 && (fromDelta.col != toDelta.col ||
+            board[fromDelta.row][fromDelta.col] != board[toDelta.row][toDelta.col])) {
             var lDelta = {
                 startDelta: startDelta,
                 endDelta: endDelta
@@ -32601,6 +32603,7 @@ var gameLogic;
     function updateBoard(board, fromDelta, toDelta) {
         var boardTemp = angular.copy(board);
         var match = getMatch(boardTemp, fromDelta, toDelta);
+        log.info("match size " + match.length);
         if (!match || match.length === 0) {
             throw new Error("Can only make a move for pet matches of 3 or over 3!");
         }
