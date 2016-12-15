@@ -52,13 +52,15 @@
         <!--score notice-->
         <div class="scoreNotice"
             ng-class="{scoreNotice: game.shouldShowScore()}"
-            ng-show="game.shouldShowScore() && game.currentUpdateUI.move.turnIndexAfterMove == 0"> 
+            ng-show="game.shouldShowScore()"> <!--&& game.currentUpdateUI.move.turnIndexAfterMove == 0 -->
                 +{{game.getCurScore()}}
         </div>
 
         <!-- scoreboard -->
         <div class = "center"> 
-                {{ "Current: " + game.state.scores[1] + "  Turns left: " + (game.getTotSteps() - game.getMyCompletedSteps()) }}
+            {{ "Player 0: " + game.state.scores[0] + "  Remaining Turns: " + (game.getTotSteps() - game.getOpponentCompletedSteps()) }}
+            <br>
+            {{ "Player 1: " + game.state.scores[1] + "  Remaining Turns: " + (game.getTotSteps() - game.getMyCompletedSteps()) }}
         </div>
     </body>
 <html>
