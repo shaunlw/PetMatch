@@ -6,30 +6,30 @@ html, body {
   overflow: hidden;
   position: fixed!important;
 }
-
 body {
   background: url('../imgs/water.jpg');
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
 
-
-@keyframes Fade {
-  from {opacity: 1;  transform: translateY(0);}
-  to {opacity:0.1;  transform: translateY(-50%);}
-}
-
-.scoreBoard {
-  position:absolute;
-  left:0;
-  top: 5%;
-  width:100%;
+#scoreBoard {
+  position: absolute;
+  height:10%;
+  width :100%;
   text-align: center;
+  vertical-align : middle; 
   z-index: 10;
   color: yellow;
-  font-size: 4vw;;
+  font-size: 2.5vw;
   background:transparent;
   font-family: sans-serif;
+}
+#gameBoard {
+  position:absolute;
+  top:10%;
+  left:0;
+  height:90%;
+  width:100%;
 }
 
 .scoreNotice {
@@ -44,7 +44,6 @@ body {
   font-size: 15vw;
   animation: Fade 5s ease-out;
   transform: translate3d(0,0,0);
-  z-index:100;
 }
 
 .img_container {
@@ -54,7 +53,12 @@ body {
   z-index:10;
 }
 
-@keyframes movedown1 {/*move down 1 step*/
+@keyframes Fade {
+  from {opacity: 1;  transform: translateY(0);}
+  to {opacity:0.1;  transform: translateY(-50%);}
+}
+
+@keyframes movedown1 {
   from {  transform: translateY(-100%);}
   to { transform: translateY(0);}
 }
@@ -97,8 +101,6 @@ body {
 
 .movedown1 {
   animation: movedown1 .25s ease-in-out;
-  /*background-color:blue;*/
-  /*border-radius: 50%;*/
 }
 
 .movedown2 {

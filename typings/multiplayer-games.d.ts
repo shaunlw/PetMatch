@@ -73,6 +73,7 @@ interface IResizeGameAreaService {
   setWidthToHeight(widthToHeightRatio: number,
     dimensionsChanged?: (gameAreaWidth: number, gameAreaHeight: number)=>void): void;
 }
+
 declare var resizeGameAreaService: IResizeGameAreaService;
 
 interface ILog {

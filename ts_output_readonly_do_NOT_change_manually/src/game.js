@@ -9,8 +9,8 @@ var game;
     game.animationEndedTimeout = null;
     game.state = null;
     game.board = null;
-    game.dragAndDropStartPos = null;
-    game.dragAndDropElement = null;
+    game.startDelta = null;
+    game.ele = null;
     function getCurScore() {
         var afterscoresum = 0;
         var beforePlayer0 = 0;
@@ -74,7 +74,6 @@ var game;
             throw new Error("Can't find gameArea!");
         translate.setTranslations(getTranslations());
         translate.setLanguage('en');
-        //log.log("Translation of 'RULES_OF_PETMATCH' is " + translate('RULES_OF_PETMATCH'));
         resizeGameAreaService.setWidthToHeight(1);
         moveService.setGame({
             minNumberOfPlayers: 2,
@@ -108,36 +107,35 @@ var game;
         var y = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2); //the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
         log.log("x position : " + x);
         log.log("y position : " + y);
-        var dragAndDropPos = {
-            top: y - cellSize.height * 0.605,
-            left: x - cellSize.width * 0.605
-        };
-        var dragAndDropStart;
-        //dragging around
-        if (type == "touchmove") {
-            if (dragAndDropPos)
-                setDragAndDropElementPos(dragAndDropPos, cellSize);
-            return;
-        }
-        //get the index of cell based on current pos (cx, cy). identify cell based on mouse position
+        //calculate delta based on mouse position
         var delta = {
-            row: Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
+            row: Math.floor(PARAMS.ROWS * (y - 0.1 * gameArea.clientHeight) / (gameArea.clientHeight * 0.9)),
             col: Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
         };
         log.log(delta);
+        var pos = {
+            top: y - cellSize.height * 0.5,
+            left: x - cellSize.width * 0.5
+        };
+        var startPos;
         if (type == "touchstart") {
-            game.dragAndDropStartPos = delta; //save start cell, because a new delta will be calculated once pressed mouse is moved.
-            dragAndDropStart = dragAndDropPos;
-            game.dragAndDropElement = document.getElementById("img_container_" + game.dragAndDropStartPos.row + "_" + game.dragAndDropStartPos.col);
-            var style = game.dragAndDropElement.style;
+            game.startDelta = delta; //save start cell, because a new delta will be calculated once pressed mouse is moved.
+            startPos = getTopLeft(delta.row, delta.col, cellSize); //save start coordinate
+            game.ele = document.getElementById("img_container_" + game.startDelta.row + "_" + game.startDelta.col);
+            var style = game.ele.style;
             style['z-index'] = 20;
-            setDragAndDropElementPos(dragAndDropPos, cellSize);
+            setPos(pos, cellSize);
             return;
         }
-        if (type == "touchend" && game.dragAndDropStartPos) {
+        //dragging around
+        if (type == "touchmove") {
+            if (pos)
+                setPos(pos, cellSize);
+        }
+        if (type == "touchend" && game.startDelta) {
             var fromDelta = {
-                row: game.dragAndDropStartPos.row,
-                col: game.dragAndDropStartPos.col
+                row: game.startDelta.row,
+                col: game.startDelta.col
             };
             var toDelta = {
                 row: delta.row,
@@ -160,26 +158,24 @@ var game;
         if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
             endDragAndDrop();
         }
-    } //end handleDragEvent()
+    }
     game.handleDragEvent = handleDragEvent;
     function getCellSize() {
         return {
             width: gameArea.clientWidth / PARAMS.COLS,
-            height: gameArea.clientHeight / PARAMS.ROWS
+            height: (gameArea.clientHeight) * 0.9 / PARAMS.ROWS
         };
     }
     /**
    * Set the TopLeft of the element.
    */
-    function setDragAndDropElementPos(pos, cellSize) {
-        var style = game.dragAndDropElement.style;
-        var top = cellSize.height / 10;
-        var left = cellSize.width / 10;
-        var originalSize = getCellPos(game.dragAndDropStartPos.row, game.dragAndDropStartPos.col, cellSize);
-        var deltaX = (pos.left - originalSize.left + left);
-        var deltaY = (pos.top - originalSize.top + top);
-        // make it 20% bigger (as if it's closer to the person dragging).
+    function setPos(pos, cellSize) {
+        var startPos = getTopLeft(game.startDelta.row, game.startDelta.col, cellSize);
+        var deltaX = pos.left - startPos.left;
+        var deltaY = pos.top - startPos.top;
         var transform = "translate(" + deltaX + "px," + deltaY + "px) scale(1.2)";
+        var style = game.ele.style;
+        log.log("pos.top:" + pos.top + "; startPos.top:" + startPos.top);
         style['transform'] = transform;
         style['-webkit-transform'] = transform;
         style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
@@ -187,8 +183,8 @@ var game;
     /**
      * Get the position of the cell.
      **/
-    function getCellPos(row, col, cellSize) {
-        var top = row * cellSize.height;
+    function getTopLeft(row, col, cellSize) {
+        var top = row * cellSize.height + gameArea.clientHeight * 0.1; //10% of gameArea height is used for score board
         var left = col * cellSize.width;
         var pos = { top: top, left: left };
         return pos;
@@ -255,13 +251,13 @@ var game;
         return true;
     }
     function clearDragAndDrop() {
-        game.dragAndDropStartPos = null;
+        game.startDelta = null;
     }
     function endDragAndDrop() {
-        game.dragAndDropStartPos = null;
-        if (game.dragAndDropElement)
-            game.dragAndDropElement.removeAttribute("style");
-        game.dragAndDropElement = null;
+        game.startDelta = null;
+        if (game.ele)
+            game.ele.removeAttribute("style");
+        game.ele = null;
     }
     function getMoveDownClass(row, col) {
         var res = 0;

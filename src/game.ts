@@ -25,8 +25,8 @@ module game {
     export let animationEndedTimeout: ng.IPromise<any> = null;
     export let state: IState = null;
     export let board: Board = null;
-    export let dragAndDropStartPos: BoardDelta = null;
-    export let dragAndDropElement: HTMLElement = null;
+    export let startDelta: BoardDelta = null;
+    export let ele: HTMLElement = null;
 
   export function getCurScore(){
     let afterscoresum = 0;
@@ -89,10 +89,8 @@ module game {
         registerServiceWorker();
         gameArea = document.getElementById("gameArea");
         if (!gameArea) throw new Error("Can't find gameArea!");
-
         translate.setTranslations(getTranslations());
         translate.setLanguage('en');
-        //log.log("Translation of 'RULES_OF_PETMATCH' is " + translate('RULES_OF_PETMATCH'));
         resizeGameAreaService.setWidthToHeight(1);
 
         moveService.setGame({
@@ -128,37 +126,42 @@ module game {
         let y : number = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2);//the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
         log.log("x position : " + x);
         log.log("y position : " + y);
-        let dragAndDropPos = {
-            top : y - cellSize.height * 0.605,
-            left : x - cellSize.width * 0.605
-        };
-        let dragAndDropStart : any;
-
-        //dragging around
-        if (type == "touchmove") {
-            if (dragAndDropPos) setDragAndDropElementPos(dragAndDropPos, cellSize);
-            return;
-        }
-        //get the index of cell based on current pos (cx, cy). identify cell based on mouse position
+        
+        //calculate delta based on mouse position
         let delta : BoardDelta = {
-            row : Math.floor(PARAMS.ROWS * y / gameArea.clientHeight),
+            row : Math.floor(PARAMS.ROWS * (y-0.1*gameArea.clientHeight) / (gameArea.clientHeight * 0.9)),
             col : Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
         };
         log.log(delta);
+
+        let pos = {
+            top : y - cellSize.height * 0.5,
+            left : x - cellSize.width * 0.5
+        };
+        
+        let startPos : any;
+
         if (type == "touchstart"){//if mouse pressed down
-            dragAndDropStartPos = delta;//save start cell, because a new delta will be calculated once pressed mouse is moved.
-            dragAndDropStart = dragAndDropPos;
-            dragAndDropElement = document.getElementById("img_container_" + dragAndDropStartPos.row + "_" + dragAndDropStartPos.col);
-            let style: any = dragAndDropElement.style;
+            startDelta = delta;//save start cell, because a new delta will be calculated once pressed mouse is moved.
+            startPos = getTopLeft(delta.row,delta.col,cellSize);//save start coordinate
+            ele = document.getElementById("img_container_" + startDelta.row + "_" + startDelta.col);
+            let style: any = ele.style;
             style['z-index'] = 20;
-            setDragAndDropElementPos(dragAndDropPos, cellSize);
+            setPos(pos, cellSize);
             return;
         }
+
+
+        //dragging around
+        if (type == "touchmove") {
+            if (pos) setPos(pos, cellSize);
+            // return;
+        }
         
-        if (type == "touchend" && dragAndDropStartPos) {//if mouse released from a drag
+        if (type == "touchend" && startDelta) {
             let fromDelta = {
-                row : dragAndDropStartPos.row,
-                col : dragAndDropStartPos.col
+                row : startDelta.row,
+                col : startDelta.col
             };
             let toDelta = {
                 row : delta.row,//new delta is calculated based on new cursor position
@@ -180,27 +183,25 @@ module game {
         if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
             endDragAndDrop();
         }
-    }//end handleDragEvent()
+    }
 
     function getCellSize() : CellSize {//calculate cell size, which varies on different devices.
         return {
             width : gameArea.clientWidth / PARAMS.COLS,//gameArea.clientWidth is the width of the html body.
-            height : gameArea.clientHeight / PARAMS.ROWS
+            height : (gameArea.clientHeight)*0.9 / PARAMS.ROWS
         };
     }
     
     /**
    * Set the TopLeft of the element.
    */
-  function setDragAndDropElementPos(pos: TopLeft, cellSize: CellSize): void {
-    let style: any = dragAndDropElement.style;
-    let top: number = cellSize.height / 10;
-    let left: number = cellSize.width / 10;
-    let originalSize = getCellPos(dragAndDropStartPos.row, dragAndDropStartPos.col, cellSize);
-    let deltaX: number = (pos.left - originalSize.left + left);
-    let deltaY: number = (pos.top - originalSize.top + top);
-    // make it 20% bigger (as if it's closer to the person dragging).
+  function setPos(pos: TopLeft, cellSize: CellSize): void {
+    let startPos = getTopLeft(startDelta.row, startDelta.col, cellSize);
+    let deltaX: number = pos.left - startPos.left;
+    let deltaY: number = pos.top - startPos.top;
     let transform = "translate(" + deltaX + "px," + deltaY + "px) scale(1.2)";
+    let style: any = ele.style;
+    log.log("pos.top:" + pos.top + "; startPos.top:" + startPos.top)
     style['transform'] = transform;
     style['-webkit-transform'] = transform;
     style['will-change'] = "transform"; // https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
@@ -209,8 +210,8 @@ module game {
  /**
   * Get the position of the cell.
   **/
-  function getCellPos(row: number, col: number, cellSize: CellSize): TopLeft {
-    let top: number = row * cellSize.height;
+  function getTopLeft(row: number, col: number, cellSize: CellSize): TopLeft {
+    let top: number = row * cellSize.height + gameArea.clientHeight*0.1;//10% of gameArea height is used for score board
     let left: number = col * cellSize.width;
     let pos: TopLeft = {top: top, left: left};
     return pos;
@@ -279,13 +280,13 @@ module game {
     }
 
     function clearDragAndDrop() {
-        dragAndDropStartPos = null;
+        startDelta = null;
     }
 
     function endDragAndDrop() : void {
-        dragAndDropStartPos = null;
-        if (dragAndDropElement) dragAndDropElement.removeAttribute("style");
-        dragAndDropElement = null;
+        startDelta = null;
+        if (ele) ele.removeAttribute("style");
+        ele = null;
     }
 
     export function getMoveDownClass(row: number, col: number): string {//find out how many steps a ball,if needed, should move down
