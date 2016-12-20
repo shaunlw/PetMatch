@@ -82,7 +82,7 @@ var game;
             updateUI: updateUI,
             gotMessageFromPlatform: null,
         });
-        dragAndDropService.addDragListener("gameArea", handleDragEvent); //'gameArea' here refers to the reference variable not the string literal representing the element id.
+        dragAndDropService.addDragListener("gameBoard", handleDragEvent); //'gameArea' here refers to the reference variable not the string literal representing the element id.
     } //addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
     game.init = init;
     // function getTranslation() : Translations {
