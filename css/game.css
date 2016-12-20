@@ -34,15 +34,14 @@ body {
 
 .scoreNotice {
   position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
+  top:50%;
+  width:100%;
   height:100%;
   text-align: center;
   z-index:10;
   color: red;
   font-size: 15vw;
-  animation: Fade 5s ease-out;
+  animation: 4s linear Fade;
   transform: translate3d(0,0,0);
 }
 
@@ -55,7 +54,7 @@ body {
 
 @keyframes Fade {
   from {opacity: 1;  transform: translateY(0);}
-  to {opacity:0.1;  transform: translateY(-50%);}
+  to {opacity:0.1;  transform: translateY(-100%);}
 }
 
 @keyframes movedown1 {

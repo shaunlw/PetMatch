@@ -50,7 +50,7 @@
         <!--score notice-->
         <div
             ng-class="{scoreNotice: game.shouldShowScore()}"
-            ng-show="game.shouldShowScore()"> <!--&& game.currentUpdateUI.move.turnIndexAfterMove == 0 -->
+            ng-show="game.shouldShowScore()">
                 +{{game.getCurScore()}}
         </div>
     </body>
