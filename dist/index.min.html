@@ -15,17 +15,17 @@
         
         <div id = "gameArea">
             <div id="scoreBoard">
-                <!--if not pass and play mode-->
+                <!--if not passAndPlay mode-->
                 <div class="div-inline1" ng-if="!game.isPassAndPlay()">Score: <span class="scoreColor">{{game.state.scores[game.yourPlayerIndex()]}}</span>
                 </div> 
-                <!--if pass and play mode-->
+                <!--if passAndPlay mode-->
                 <div class="div-inline1" ng-if="game.isPassAndPlay()">Player 1: <span class="scoreColor">{{game.state.scores[0]}}</span></div>
-                <!--the same no matter pass and play mode or not-->
+                <!--the same no matter passAndPlay mode or not-->
                 <div class="div-inline1">&nbsp;&nbsp; Steps Left: <span class="scoreColor">{{game.getTotSteps() - game.getMyCompletedSteps()}}</span>&nbsp;&nbsp;</div> 
-                <!--if not pass and play mode-->
+                <!--if not passAndPlay mode-->
                 <div class="div-inline2" ng-if="!game.isPassAndPlay()">Opponent: <span class="scoreColor">{{game.state.scores[game.opponentIndex()]}}</span>
                 </div> 
-                <!--if pass and play mode-->
+                <!--if passAndPlay mode-->
                 <div class="div-inline2" ng-if="game.isPassAndPlay()" >Player 2: <span class="scoreColor">{{game.state.scores[1]}}</span></div>
                 <div class="div-inline2" ng-if="game.isPassAndPlay()" >&nbsp;&nbsp; Steps Left: <span class="scoreColor">{{game.getTotSteps() - game.getOpponentCompletedSteps()}}</span>&nbsp;&nbsp; </div> 
 

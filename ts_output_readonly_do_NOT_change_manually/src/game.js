@@ -124,12 +124,14 @@ var game;
             game.ele = document.getElementById("img_container_" + game.startDelta.row + "_" + game.startDelta.col);
             var style = game.ele.style;
             style['z-index'] = 20;
-            setPos(pos, cellSize);
+            if (game.startDelta) {
+                setPos(pos, cellSize);
+            }
             return;
         }
         //dragging around
         if (type == "touchmove") {
-            if (pos)
+            if (pos && game.startDelta)
                 setPos(pos, cellSize);
         }
         if (type == "touchend" && game.startDelta) {

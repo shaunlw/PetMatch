@@ -147,14 +147,16 @@ module game {
             ele = document.getElementById("img_container_" + startDelta.row + "_" + startDelta.col);
             let style: any = ele.style;
             style['z-index'] = 20;
-            setPos(pos, cellSize);
+            if (startDelta) {
+                setPos(pos, cellSize);
+            }
             return;
         }
 
 
         //dragging around
         if (type == "touchmove") {
-            if (pos) setPos(pos, cellSize);
+            if (pos && startDelta) setPos(pos, cellSize);
             // return;
         }
         
