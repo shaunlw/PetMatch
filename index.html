@@ -20,13 +20,45 @@
     </head>
 
     <body ng-cloak>
+        
         <div id = "gameArea">
-        <!-- scoreboard -->
-        <div id="scoreBoard"> 
-            {{ "Player 1: " + game.state.scores[0] + "  Remaining Steps: " + (game.getTotSteps() - game.getOpponentCompletedSteps()) }}
-            <br>
-            {{ "Player 2: " + game.state.scores[1] + "  Remaining Steps: " + (game.getTotSteps() - game.getMyCompletedSteps()) }}
-        </div>
+            <div id="scoreBoard">
+                <!--if not pass and play mode-->
+                <div class="div-inline" ng-if="!game.isPassAndPlay()" ng-class="{currentPlayer: (game.isCurrentPlayerIndex(0) && game.isMyTurn()) || 
+                    (game.isCurrentPlayerIndex(1) && !game.isMyTurn())}">Player: <span class="scoreColor">{{game.state.scores[0]}}</span>
+                </div> 
+                <!--if pass and play mode-->
+                <div class="div-inline1" ng-if="game.isPassAndPlay()">Player 1: <span class="scoreColor">{{game.state.scores[0]}}</span></div>
+                <!--the same no matter pass and play mode or not-->
+                <div class="div-inline1">&nbsp;&nbsp; Steps Left: <span class="scoreColor">{{game.getTotSteps() - game.getMyCompletedSteps()}}</span>&nbsp;&nbsp;</div> 
+                <!--if not pass and play mode-->
+                <div class="div-inline2" ng-if="!game.isPassAndPlay()" ng-class="{currentPlayer: (game.isCurrentPlayerIndex(1) && game.isMyTurn()) || 
+                    (game.isCurrentPlayerIndex(0) && !game.isMyTurn())}">Oponent: <span class="scoreColor">{{game.state.scores[1]}}</span>
+                </div> 
+                <!--if pass and play mode-->
+                <div class="div-inline2" ng-if="game.isPassAndPlay()" >Player 2: <span class="scoreColor">{{game.state.scores[1]}}</span></div>
+                <div class="div-inline2" ng-if="game.isPassAndPlay()" >&nbsp;&nbsp; Steps Left: <span class="scoreColor">{{game.getTotSteps() - game.getOpponentCompletedSteps()}}</span>&nbsp;&nbsp; </div> 
+
+
+                <!--<table align="center">
+                    <tr>
+                        <td></td>
+                        <td>Score</td>
+                        <td>Steps Left</td>
+                        <td></td>
+                        <td>Score</td>
+                        <td>Steps Left</td>
+                    </tr>
+                    <tr>
+                        <td style="background:green;border-radius:20%;">Player 1</td>
+                        <td class="cellColor">{{game.state.scores[0]}}</td>
+                        <td class="cellColor">{{game.getTotSteps() - game.getOpponentCompletedSteps()}}</td>
+                        <td style="background:green;border-radius:20%;">Player 2</td>
+                        <td class="cellColor">{{game.state.scores[1]}}</td>
+                        <td class="cellColor">{{game.getTotSteps() - game.getMyCompletedSteps()}}</td>
+                    </tr>
+                </table>-->
+            </div>
 
             <div id="gameBoard">
                 <div ng-repeat="row in [0, 1, 2, 3, 4, 5, 6, 7, 8]"

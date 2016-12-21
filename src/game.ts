@@ -74,11 +74,11 @@ module game {
     } 
 
     export function getMyCompletedSteps (): any {//return steps been completed
-        return state.completedSteps[currentUpdateUI.move.turnIndexAfterMove];
+        return state.completedSteps[1- currentUpdateUI.move.turnIndexAfterMove];
     }
 
     export function getOpponentCompletedSteps (): any {//return steps been completed
-        return state.completedSteps[1 - currentUpdateUI.move.turnIndexAfterMove];
+        return state.completedSteps[currentUpdateUI.move.turnIndexAfterMove];
     }
     
     function getTranslations(): Translations {
@@ -314,6 +314,10 @@ module game {
 
     function isFirstMove() {
         return !currentUpdateUI.move.stateAfterMove;
+    }
+
+    export function isPassAndPlay() {
+        return currentUpdateUI.playMode === 'passAndPlay';
     }
 
     function yourPlayerIndex() {

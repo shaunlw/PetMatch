@@ -32829,11 +32829,11 @@ var game;
     }
     game.getTotSteps = getTotSteps;
     function getMyCompletedSteps() {
-        return game.state.completedSteps[game.currentUpdateUI.move.turnIndexAfterMove];
+        return game.state.completedSteps[1 - game.currentUpdateUI.move.turnIndexAfterMove];
     }
     game.getMyCompletedSteps = getMyCompletedSteps;
     function getOpponentCompletedSteps() {
-        return game.state.completedSteps[1 - game.currentUpdateUI.move.turnIndexAfterMove];
+        return game.state.completedSteps[game.currentUpdateUI.move.turnIndexAfterMove];
     }
     game.getOpponentCompletedSteps = getOpponentCompletedSteps;
     function getTranslations() {
@@ -33056,6 +33056,10 @@ var game;
     function isFirstMove() {
         return !game.currentUpdateUI.move.stateAfterMove;
     }
+    function isPassAndPlay() {
+        return game.currentUpdateUI.playMode === 'passAndPlay';
+    }
+    game.isPassAndPlay = isPassAndPlay;
     function yourPlayerIndex() {
         return game.currentUpdateUI.yourPlayerIndex;
     }
