@@ -291,6 +291,11 @@ var game;
     function yourPlayerIndex() {
         return game.currentUpdateUI.yourPlayerIndex;
     }
+    game.yourPlayerIndex = yourPlayerIndex;
+    function opponentIndex() {
+        return 1 - game.currentUpdateUI.yourPlayerIndex;
+    }
+    game.opponentIndex = opponentIndex;
     function isComputer() {
         return game.currentUpdateUI.playersInfo[game.currentUpdateUI.yourPlayerIndex].playerId === '';
     }

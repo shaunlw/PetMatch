@@ -320,8 +320,12 @@ module game {
         return currentUpdateUI.playMode === 'passAndPlay';
     }
 
-    function yourPlayerIndex() {
+    export function yourPlayerIndex() {
         return currentUpdateUI.yourPlayerIndex;
+    }
+
+    export function opponentIndex() {
+        return 1-currentUpdateUI.yourPlayerIndex;
     }
 
     function isComputer() {
