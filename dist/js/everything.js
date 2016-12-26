@@ -32817,7 +32817,7 @@ var game;
     }
     game.getMyScore = getMyScore;
     function shouldShowScore() {
-        return !game.animationEnded && (getMyScore() !== 0 || getMyCompletedSteps() == 0) && getOpponentCompletedSteps() !== 0;
+        return !game.animationEnded && (getMyScore() !== 0 || getOpponentCompletedSteps() == 0) && getMyCompletedSteps() !== 0;
     }
     game.shouldShowScore = shouldShowScore;
     function getOpponentScore() {

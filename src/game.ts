@@ -62,7 +62,7 @@ module game {
     }
 
     export function shouldShowScore() {
-        return !animationEnded && (getMyScore() !== 0 || getMyCompletedSteps() == 0) && getOpponentCompletedSteps() !== 0;
+        return !animationEnded && (getMyScore() !== 0 || getOpponentCompletedSteps() == 0) && getMyCompletedSteps() !== 0;
     }
     
     export function getOpponentScore(): any{//return accumulated scores
