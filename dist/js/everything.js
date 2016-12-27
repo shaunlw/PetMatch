@@ -32854,45 +32854,31 @@ var game;
             updateUI: updateUI,
             gotMessageFromPlatform: null,
         });
-        dragAndDropService.addDragListener("gameBoard", handleDragEvent); //'gameArea' here refers to the reference variable not the string literal representing the element id.
-    } //addDragListener() applies a event monitor to 'gameArea', once mouse hovers over 'gameArea', the monitor collects mouse information (type of event, position of curse) to handleEvent that is implemented by users.
+        dragAndDropService.addDragListener("gameBoard", handleDragEvent);
+    }
     game.init = init;
-    // function getTranslation() : Translations {
-    //     return {
-    //         RULES_OF_PETMATCH : {
-    //             en : "Rules of PetMatch",
-    //             zh : "宠物对对碰游戏规则",
-    //         },
-    //         PET_MATCH_RULES_SLIDE1 : {
-    //             en : "You and your opponent take turns to swap adjacent animals. If you have 3 or over 3 matches over a line, you get score increased according to the number of matches.",
-    //             zh : "你和你的对手轮流进行操作。你需要拖换相邻的宠物。如果拖换之后你得到了三个或者三个以上一样的宠物相连成一条线，连成一条线的宠物数目有多少，你的分数就对应增长多少。",
-    //         }
-    //     };
-    // }
+    function getTranslation() {
+        return {};
+    }
     function handleDragEvent(type, cx, cy) {
-        log.log("type", type);
-        log.log("cx " + cx);
-        log.log("cy : " + cy);
         //if the user drags cell to outside of the game area, the function will take middle point of the nearest cell        
         var cellSize = getCellSize(); //cell size changes when you switch device or resize window             
         var x = Math.min(Math.max(cx - gameArea.offsetLeft, cellSize.width / 2), gameArea.clientWidth - cellSize.width / 2); //convert absolute position to relative position (relative to parent element)
         var y = Math.min(Math.max(cy - gameArea.offsetTop, cellSize.height / 2), gameArea.clientHeight - cellSize.height / 2); //the inner max() takes care if cursor moves to the left or below gameArea. the outer min takes care if cursor moves to the right or top of gameArea
-        log.log("x position : " + x);
-        log.log("y position : " + y);
         //calculate delta based on mouse position
         var delta = {
             row: Math.floor(PARAMS.ROWS * (y - 0.1 * gameArea.clientHeight) / (gameArea.clientHeight * 0.9)),
             col: Math.floor(PARAMS.COLS * x / gameArea.clientWidth)
         };
-        log.log(delta);
+        //log.log(delta);
         var pos = {
             top: y - cellSize.height * 0.5,
             left: x - cellSize.width * 0.5
         };
         var startPos;
         if (type == "touchstart") {
-            game.startDelta = delta; //save start cell, because a new delta will be calculated once pressed mouse is moved.
-            startPos = getTopLeft(delta.row, delta.col, cellSize); //save start coordinate
+            game.startDelta = delta;
+            startPos = getTopLeft(delta.row, delta.col, cellSize);
             game.ele = document.getElementById("img_container_" + game.startDelta.row + "_" + game.startDelta.col);
             var style = game.ele.style;
             style['z-index'] = 20;
@@ -32901,10 +32887,10 @@ var game;
             }
             return;
         }
-        //dragging around
         if (type == "touchmove") {
             if (pos && game.startDelta)
                 setPos(pos, cellSize);
+            return;
         }
         if (type == "touchend" && game.startDelta) {
             var fromDelta = {
@@ -32917,16 +32903,15 @@ var game;
             };
             var nextMove = null;
             if (dragOk(fromDelta, toDelta)) {
-                //let changedBoardCount : BoardCount = gameLogic.updateBoard(state.board, fromDelta, toDelta);
                 try {
                     nextMove = gameLogic.createMove(game.state, fromDelta, toDelta, game.currentUpdateUI.move.turnIndexAfterMove);
                 }
                 catch (e) {
                     log.info(["Move is illegal:", e]);
-                    endDragAndDrop(); //move back to original position
+                    endDragAndDrop();
                     return;
                 }
-                makeMove(nextMove); //make legal move
+                makeMove(nextMove);
             }
         }
         if (type === "touchend" || type === "touchcancel" || type === "touchleave") {
