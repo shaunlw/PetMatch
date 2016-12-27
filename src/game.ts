@@ -92,7 +92,6 @@
             translate.setTranslations(getTranslations());
             translate.setLanguage('en');
             resizeGameAreaService.setWidthToHeight(1);
-
             moveService.setGame({
             minNumberOfPlayers: 2,
             maxNumberOfPlayers: 2,
